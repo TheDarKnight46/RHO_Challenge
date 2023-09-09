@@ -8,11 +8,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 
-import jakarta.json.Json;
-import jakarta.json.JsonObject;
-import jakarta.json.stream.JsonParser;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
-public class ExchangeRateAPI {
+public class ExchangeRateAPI implements ExchangeRateAPIInterface {
     
     public ExchangeRateAPI() {}
 
@@ -21,12 +21,13 @@ public class ExchangeRateAPI {
 	 * @param request HttpURLConnection. Request must be connected before sending as parameter.
 	 * @return JsonObject extracted from the request.
 	 */
-    private JsonObject parseJsonObject(HttpURLConnection request) {
+    private JSONObject parseJsonObject(HttpURLConnection request) {
 		try {
-			JsonParser jp = Json.createParser(new InputStreamReader((InputStream) request.getContent()));
-			return jp.getObject();
+			InputStreamReader isr = new InputStreamReader((InputStream) request.getContent());
+			JSONParser jp = new JSONParser();
+			return (JSONObject) jp.parse(isr);
 		}
-		catch (IOException e) {
+		catch (IOException | ParseException e) {
 			System.out.println("IOEsception - request.getContent()");
 			return null;
 		}
@@ -37,47 +38,79 @@ public class ExchangeRateAPI {
 	 * @param urlStr String of the URL where the request is gonna be made.
 	 * @return JsonObject as string.
 	 */
-	private String requestAPICall(String urlStr) {
+	private JSONObject requestAPICall(String urlStr) {
 		try {
 			URI uri = new URI(urlStr);
 			URL url = uri.toURL();
 			HttpURLConnection request = (HttpURLConnection) url.openConnection();
 			request.connect();
 
-			return parseJsonObject(request).get("result").toString();
+			return parseJsonObject(request);
 		}
 		catch (IOException | URISyntaxException e) {
 			return null;
 		}
 	}
 
+/* 
+	a. Get exchange rate from Currency A to Currency B
+	b. Get all exchange rates from Currency A
+	c. Get value conversion from Currency A to Currency B
+	d. Get value conversion from Currency A to a list of supplied currencies
+*/
+
 	/**
-	 * Get latests exchange rates. Request URL: https://api.exchangerate.host/latest.
-	 * @return JsonObject as string. 
+	 * Get latest exchange rates for a specifed currency and target
+	 * @param currency Currency from which to exchange.
+	 * @param target List of target currencies to get the exchange rate.
+	 * @param amount Amount of currency to exchange.
+	 * @return Result field of JsonObject as string.
 	 */
-	public String getLatestRates() {
-		return requestAPICall("https://api.exchangerate.host/latest");	
+	@Override
+	public JSONObject getExchangeRates(String currency, String targets, int amount) {
+		//String symbols = getCurrenciesCommaSeparated(targets);
+		String urlStr = String.format("https://api.exchangerate.host/latest?base=%s&symbols=%s&amount=%d", currency, targets, amount);
+		return requestAPICall(urlStr);
+	}
+
+	/**
+	 * Get all latest exchange rates for a specified currency.
+	 * @param currency Currency from which to exchange.
+	 * @param amount Amount of the currency to exchange.
+	 * @return Result field of JsonObject as string.
+	 */
+	@Override
+	public JSONObject getAllExchangeRates(String currency, int amount) {
+		String urlStr = String.format("https://api.exchangerate.host/latest?base=%s&amount=%d", currency, amount);
+		return requestAPICall(urlStr);	
 	}
 
 	/**
 	 * Convert currency from one to another.
 	 * @param from Currency from which to convert.
 	 * @param to Currency to convert to.
-	 * @return JsonObject as string.
+	 * @return Result field of JsonObject as string.
 	 */
-	public String convertCurrency(String from, String to) {
-		String urlStr = String.format("https://api.exchangerate.host/convert?from=%s&to=%s", from, to);
+	@Override
+	public JSONObject convertCurrency(String from, String to, int amount) {
+		String urlStr = String.format("https://api.exchangerate.host/convert?from=%s&to=%s&amount=%d", from, to, amount);
 		return requestAPICall(urlStr);
 	}
 
 	/**
-	 * Get historical rates since a specific date.
-	 * @param month Month from when to get the historical rates. 
-	 * @param year Year from when to get the historical rates.
-	 * @return JsonObject as string.
+	 * Convert currency from one to many.
+	 * @param from 
+	 * @param to
+	 * @param currencies
+	 * @return Result field of JsonObject as string.
 	 */
-	public String historicalRates(String month, String year) {
-		String urlStr = String.format("https://api.exchangerate.host/%s-%s-01", year, month);
+	/*@Override
+	public JSONObject convertCurrencyToSeveral(String from, String to, String targets, int amount) {
+		// for (String currency : targets) {
+			
+		// }
+		//String symbols = getCurrenciesCommaSeparated(targets);
+		String urlStr = String.format("https://api.exchangerate.host/convert?from=%s&to=%s&symbols=%s&amount=%d", from, to, targets, amount);
 		return requestAPICall(urlStr);
-	}
+	}*/
 }
