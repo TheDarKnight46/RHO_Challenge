@@ -8,3 +8,4 @@ API Requests:
 - Get Latest Rates;
 - Convert Currency;
 - Get Historical Rates.
+
