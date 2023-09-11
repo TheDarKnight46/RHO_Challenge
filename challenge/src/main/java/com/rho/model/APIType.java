@@ -1,7 +1,7 @@
-package com.rho.data;
+package com.rho.model;
 
 public enum APIType {
     HOST,
     AYR,
-    LAYER
+    CURRENCY
 }

@@ -1,4 +1,4 @@
-package com.rho.api;
+package com.rho.services;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,6 +7,9 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.time.LocalTime;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -50,4 +53,14 @@ public abstract class Connections {
 		}
 	}
 
+	public static Map<String, Integer> getCurrentTime() {
+		LocalTime now = LocalTime.now();
+		Map<String, Integer> time = new HashMap<>();
+		
+		time.put("Hour", now.getHour());
+		time.put("Minute", now.getMinute());
+		time.put("Seconds", now.getSecond());
+
+		return time;
+	}
 }

@@ -1,12 +1,16 @@
-package com.rho.api;
+package com.rho.services;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.json.simple.JSONObject;
+import org.springframework.stereotype.Service;
+
+import com.rho.model.Keys;
 
 //https://exchangerate.host/#/#docs
 
+@Service
 public class HostExchangeRateAPI implements APIInterface {
 
 	private final String baseUrl = "https://api.exchangerate.host/";
@@ -25,13 +29,15 @@ public class HostExchangeRateAPI implements APIInterface {
 		String urlStr = String.format("%s/latest?base=%s&symbols=%s", baseUrl, currency, targets);
 		JSONObject obj = Connections.requestAPICall(urlStr);
 		
-		Map<String, Object> valueMap = new HashMap<>();
+		Map<Keys, Object> valueMap = new HashMap<>();
 
-		valueMap.put("Success", obj.get("success"));
-        valueMap.put("Currency", obj.get("base"));
-        valueMap.put("Rates", obj.get("rates"));
-        valueMap.put("Date", obj.get("date"));
-		
+		valueMap.put(Keys.SUCCESS, obj.get("success"));
+        valueMap.put(Keys.CURRENCY_FROM, obj.get("base"));
+        valueMap.put(Keys.RATES, obj.get("rates"));
+        valueMap.put(Keys.RESULT_DATE, obj.get("date"));
+		valueMap.put(Keys.REQUEST_TIME, Connections.getCurrentTime());
+		valueMap.put(Keys.API, "Host");
+
 		return new JSONObject(valueMap);
 	}
 
@@ -43,15 +49,17 @@ public class HostExchangeRateAPI implements APIInterface {
 	 */
 	@Override
 	public JSONObject getAllExchangeRates(String currency) {
-		String urlStr = String.format("%s/latest?base=%s&amount=%d", baseUrl, currency);
+		String urlStr = String.format("%s/latest?base=%s", baseUrl, currency);
 		JSONObject obj = Connections.requestAPICall(urlStr);
 
-		Map<String, Object> valueMap = new HashMap<>();
+		Map<Keys, Object> valueMap = new HashMap<>();
 
-		valueMap.put("Success", obj.get("success"));
-        valueMap.put("Currency", obj.get("base"));
-        valueMap.put("Rates", obj.get("rates"));
-        valueMap.put("Date", obj.get("date"));
+		valueMap.put(Keys.SUCCESS, obj.get("success"));
+        valueMap.put(Keys.CURRENCY_FROM, obj.get("base"));
+        valueMap.put(Keys.RATES, obj.get("rates"));
+        valueMap.put(Keys.RESULT_DATE, obj.get("date"));
+		valueMap.put(Keys.REQUEST_TIME, Connections.getCurrentTime());
+		valueMap.put(Keys.API, "Host");
 
 		return new JSONObject(valueMap);
 	}
@@ -64,18 +72,20 @@ public class HostExchangeRateAPI implements APIInterface {
 	 */
 	@Override
 	public JSONObject convertCurrency(String from, String to, int amount) {
-		String urlStr = String.format("%s/convert?from=%s&to=%s&amount=%d", from, to, amount);
+		String urlStr = String.format("%s/convert?from=%s&to=%s&amount=%d", baseUrl, from, to, amount);
 		JSONObject obj = Connections.requestAPICall(urlStr);
 	
-        Map<String, Object> valueMap = new HashMap<>();
+        Map<Keys, Object> valueMap = new HashMap<>();
 
- 		valueMap.put("Success", obj.get("success"));
-        valueMap.put("Currency From", from);
-        valueMap.put("Currency To", to);
-        valueMap.put("Original Amount", amount);
-        valueMap.put("Result", obj.get("result"));
-		valueMap.put("Rate", ((JSONObject) obj.get("info")).get("rate"));
-        valueMap.put("Date", obj.get("date"));
+ 		valueMap.put(Keys.SUCCESS, obj.get("success"));
+        valueMap.put(Keys.CURRENCY_FROM, from);
+        valueMap.put(Keys.CURRENCY_TO, to);
+        valueMap.put(Keys.ORIGINAL_AMOUNT, amount);
+        valueMap.put(Keys.RESULT, obj.get("result"));
+		valueMap.put(Keys.RATES, ((JSONObject) obj.get("info")).get("rate"));
+        valueMap.put(Keys.RESULT_DATE, obj.get("date"));
+		valueMap.put(Keys.REQUEST_TIME, Connections.getCurrentTime());
+		valueMap.put(Keys.API, "Host");
 
 		return new JSONObject(valueMap);
 	}

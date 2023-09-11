@@ -1,12 +1,13 @@
-package com.rho.spring;
+package com.rho;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class ExchangeRateSpring {
+public class ExchangeRateSpringBoot {
 
 	public static void main(String[] args) {
-		SpringApplication.run(ExchangeRateSpring.class, args);
+		SpringApplication.run(ExchangeRateSpringBoot.class, args);
 	}
+
 }
