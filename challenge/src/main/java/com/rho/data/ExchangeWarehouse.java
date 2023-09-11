@@ -17,10 +17,10 @@ public abstract class ExchangeWarehouse {
         return null;
     } 
 
-    public static void addExchangeRate(String from, String to, float rate, String date) {
+    public static void addExchangeRate(String from, String to, float rate, String date, APIType source) {
         Exchange conv = findExchangeRate(from, to);
         if (conv != null) {
-            conv.editRate(rate, date);
+            conv.editRate(rate, date, source);
         }
         else {
             conversions.add(conv);

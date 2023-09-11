@@ -7,17 +7,28 @@ import java.util.Map;
 
 import org.json.simple.JSONObject;
 
-import com.rho.api.ExchangeRateAPI;
+import com.rho.api.AYRTechExchangeRateAPI;
+import com.rho.api.HostExchangeRateAPI;
+import com.rho.api.CurrencyExchangeAPI;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class RestAPIController {
-    ExchangeRateAPI api;
+public class RestAPIController { // the app compiles but i cant launch it. resume there
+    HostExchangeRateAPI hostAPI;
+    AYRTechExchangeRateAPI ayrAPI;
+    CurrencyExchangeAPI layerAPI;
     
     public RestAPIController() {
-        api = new ExchangeRateAPI();
+        hostAPI = new HostExchangeRateAPI();
+        ayrAPI = new AYRTechExchangeRateAPI();
+        layerAPI = new CurrencyExchangeAPI();
+    }
+
+    @GetMapping("/")
+    public String index() {
+        return "Hello world";
     }
 
     /**
@@ -27,13 +38,25 @@ public class RestAPIController {
      * @return
      */
     @GetMapping("/rates")
-    public JSONObject getExchangeRates(String currency, String targets, int amount) {
-        JSONObject obj = api.getExchangeRates(currency, targets, amount);
-        Map<String, Object> valueMap = new HashMap<>();
+    public JSONObject getExchangeRates(String currency, String targets, int amount, String apiType) {
+        JSONObject obj;
+        Map<String, JSONObject> valueMap = new HashMap<>();
 
-        valueMap.put("Currency", obj.get("base"));
-        valueMap.put("Rates", obj.get("rates"));
-        valueMap.put("Date", obj.get("date"));
+        switch (apiType) { //switch with String is now possible
+            case "host":        
+                obj = hostAPI.getExchangeRates(currency, targets);
+                break;  
+            case "ayr":
+                obj = ayrAPI.getExchangeRates(currency, targets);
+                break;
+            case "layer":
+                obj = layerAPI.getExchangeRates(currency, targets);
+                break;
+            default:
+                return null;
+        }
+
+        valueMap.put(apiType, obj);
 
         return new JSONObject(valueMap);
     }
@@ -44,13 +67,25 @@ public class RestAPIController {
      * @return
      */
     @GetMapping("/allrates")
-    public JSONObject getAllExchangeRates(String currency, int amount) {
-        JSONObject obj = api.getAllExchangeRates(currency, amount);
-        Map<String, Object> valueMap = new HashMap<>();
+    public JSONObject getAllExchangeRates(String currency, int amount, String apiType) {
+        JSONObject obj;
+        Map<String, JSONObject> valueMap = new HashMap<>();
 
-        valueMap.put("Currency", obj.get("base"));
-        valueMap.put("Rates", obj.get("rates"));
-        valueMap.put("Date", obj.get("date"));
+        switch (apiType) { //switch with String is now possible
+            case "host":        
+                obj = hostAPI.getAllExchangeRates(currency);
+                break;  
+            case "ayr":
+                obj = ayrAPI.getAllExchangeRates(currency);
+                break;
+            case "layer":
+                obj = layerAPI.getAllExchangeRates(currency);
+                break;
+            default:
+                return null;
+        }
+
+        valueMap.put(apiType, obj);
 
         return new JSONObject(valueMap);
     }
@@ -62,18 +97,25 @@ public class RestAPIController {
      * @return
      */
     @GetMapping("/convert")
-    public JSONObject convertCurrency(String from, String to, int amount) {
-        JSONObject obj = api.convertCurrency(from, to, amount);
-        JSONObject query = (JSONObject) obj.get("query");
+    public JSONObject convertCurrency(String from, String to, int amount, String apiType) {
+        JSONObject obj;
+        Map<String, JSONObject> valueMap = new HashMap<>();
 
-        Map<String, Object> valueMap = new HashMap<>();
+        switch (apiType) { //switch with String is now possible
+            case "host":        
+                obj = hostAPI.convertCurrency(from, to, amount);
+                break;  
+            case "ayr":
+                obj = ayrAPI.convertCurrency(from, to, amount);
+                break;
+            case "layer":
+                obj = layerAPI.convertCurrency(from, to, amount);
+                break;
+            default:
+                return null;
+        }
 
-        valueMap.put("Currency From", query.get("from"));
-        valueMap.put("Currency To", query.get("to"));
-        valueMap.put("Original Amount", query.get("amount"));
-
-        valueMap.put("Result", obj.get("result"));
-        valueMap.put("Date", obj.get("date"));
+        valueMap.put(apiType, obj);
 
         return new JSONObject(valueMap);
     }
@@ -85,19 +127,30 @@ public class RestAPIController {
      * @return
      */
     @GetMapping("/convert/multi")
-    public JSONObject convertCurrencyToSeveral(String from, String targets, int amount) {
+    public JSONObject convertCurrencyToSeveral(String from, String targets, int amount, String apiType) {
         ArrayList<String> symbols = new ArrayList<>(Arrays.asList(targets.split(",")));
         JSONObject obj = new JSONObject();
+        Map<String, JSONObject> valueMap = new HashMap<>();
 
         for (String currency : symbols) {
-            api.convertCurrency(from, currency, amount);
-            
+            switch (apiType) {
+                case "host":
+                    obj = hostAPI.convertCurrency(from, currency, amount);
+                    break;
+                case "ayr":
+                    obj = ayrAPI.convertCurrency(from, currency, amount);
+                    break;
+                case "layer":
+                    obj = layerAPI.convertCurrency(from, currency, amount);
+                    break;
+                default:
+                    break;
+            }
+
+            valueMap.put(apiType, obj);            
         }
 
-
-        
-        
-        return obj;
+        return new JSONObject(valueMap);
     }
 
     
