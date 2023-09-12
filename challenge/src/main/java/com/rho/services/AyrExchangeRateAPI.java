@@ -69,7 +69,7 @@ public class AyrExchangeRateAPI implements APIInterface {
             valueMap.put(Keys.RESULT_DATE, obj.get("time_last_update_utc"));
             valueMap.put(Keys.RATES, currencyMap);
             valueMap.put(Keys.CALL_EXECUTED, true);
-            valueMap.put(Keys.API, "Ayr");
+            valueMap.put(Keys.API, APIType.AYR);
 
             // Store the new fetched data.
             db.saveData(valueMap);
@@ -95,15 +95,16 @@ public class AyrExchangeRateAPI implements APIInterface {
 		Map<Keys, Object> valueMap = new HashMap<>();
 
         if (((String) obj.get("result")).equals("success"))
-            valueMap.put(Keys.SUCCESS, "true");
+            valueMap.put(Keys.SUCCESS, true);
         else
-            valueMap.put(Keys.SUCCESS, "false");
+            valueMap.put(Keys.SUCCESS, false);
         
         valueMap.put(Keys.CURRENCY_FROM, obj.get("base_code"));
         valueMap.put(Keys.RATES, obj.get("conversion_rates"));
         valueMap.put(Keys.RESULT_DATE, obj.get("time_last_update_utc"));
 		valueMap.put(Keys.REQUEST_TIME, Connections.getCurrentTime());
-		valueMap.put(Keys.API, "Ayr");
+        valueMap.put(Keys.CALL_EXECUTED, true);
+		valueMap.put(Keys.API, APIType.AYR);
 
         // Store the new fetched data.
         db.saveData(valueMap);
@@ -122,7 +123,8 @@ public class AyrExchangeRateAPI implements APIInterface {
         valueMap.put(Keys.CURRENCY_FROM, from);
         valueMap.put(Keys.CURRENCY_TO, to);
         valueMap.put(Keys.ORIGINAL_AMOUNT, amount);
-		valueMap.put(Keys.REQUEST_TIME, Connections.getCurrentTime());
+		Map<String, Integer> time = Connections.getCurrentTime();
+        valueMap.put(Keys.REQUEST_TIME, time);
 
         // Check if there is an old exchange updated
         if (oldExchange != null && !oldExchange.getOutdated()) {
@@ -149,10 +151,11 @@ public class AyrExchangeRateAPI implements APIInterface {
             valueMap.put(Keys.RESULT, obj.get("conversion_result"));
             valueMap.put(Keys.RATES, obj.get("conversion_rate"));
             valueMap.put(Keys.RESULT_DATE, obj.get("time_last_update_utc"));
-            valueMap.put(Keys.API, "Ayr");
+            valueMap.put(Keys.CALL_EXECUTED, true);
+            valueMap.put(Keys.API, APIType.AYR);
 
             // Store the new fetched data.
-            db.saveData(valueMap);
+            db.saveConversionData(from, to, amount, time, to, APIType.AYR);
         }
 
         return new JSONObject(valueMap);

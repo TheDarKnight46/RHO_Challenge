@@ -106,9 +106,9 @@ public class ExchangeRateController {
         }
         
         if (obj != null) {
-            obj.replace(Keys.RESULT, currencyMap); // TODO - fix
-            obj.replace(Keys.RATES, ratesMap); // TODO - fix
-            obj.replace(Keys.CURRENCY_TO, targets); // TODO - fix
+            obj.replace(Keys.RESULT, currencyMap);
+            obj.replace(Keys.RATES, ratesMap);
+            obj.replace(Keys.CURRENCY_TO, targets);
 
             return obj;
         }
@@ -120,8 +120,8 @@ public class ExchangeRateController {
     public JSONObject convertMultiCurrency(@PathVariable("from") String from, @PathVariable("targets") String targets, @PathVariable("amount") int amount, @PathVariable("api") String api) {
         JSONObject obj = null;
         ArrayList<String> symbols = new ArrayList<>(Arrays.asList(targets.replaceAll(" ", "").split(",")));
-        Map<String, Float> currencyMap = new HashMap<>();
-        Map<String, Float> ratesMap = new HashMap<>();
+        Map<String, Double> currencyMap = new HashMap<>();
+        Map<String, Double> ratesMap = new HashMap<>();
 
         
         for (String str : symbols) {
@@ -137,15 +137,15 @@ public class ExchangeRateController {
             }
             
             if (obj != null) {
-                currencyMap.put(str, (Float) obj.get(Keys.RESULT));
-                ratesMap.put(str, (Float) obj.get(Keys.RATES));
+                currencyMap.put(str, (Double) obj.get(Keys.RESULT));
+                ratesMap.put(str, (Double) obj.get(Keys.RATES));
             }
         }
           
         if (obj != null) {
-            obj.replace(Keys.RESULT, currencyMap); // TODO - fix
-            obj.replace(Keys.RATES, ratesMap); // TODO - fix
-            obj.replace(Keys.CURRENCY_TO, targets); // TODO - fix
+            obj.replace(Keys.RESULT, currencyMap);
+            obj.replace(Keys.RATES, ratesMap);
+            obj.replace(Keys.CURRENCY_TO, targets);
 
             return obj;
         }

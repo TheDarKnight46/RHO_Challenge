@@ -37,11 +37,22 @@ public class ExchangeDB {
         return null;
     }
 
+    public void saveConversionData(String from, String to, double rate, Map<String, Integer> time, String date, APIType source) {
+        Exchange e = findExchangeRate(from, to);
+
+        if (e != null) {
+            e.editRate(rate, date, time, source);
+        }
+        else {
+            exchanges.add(new Exchange(from, to, rate, date, time, source));
+        }       
+    }
+
     @SuppressWarnings("unchecked")
     public void saveData(Map<Keys, Object> valueMap) { // TODO - TEST
         Map<String, Double> ratesMap = (Map<String, Double>) valueMap.get(Keys.RATES);
         String date = (String) valueMap.get(Keys.RESULT_DATE);
-        APIType source = (APIType) valueMap.get(Keys.API);
+        APIType source = (APIType) valueMap.get(Keys.API); // error here
         String from = (String) valueMap.get(Keys.CURRENCY_FROM);
         Map<String, Integer> time = (Map<String, Integer>) valueMap.get(Keys.REQUEST_TIME);
 
@@ -50,14 +61,20 @@ public class ExchangeDB {
        
         while (keyIt.hasNext()) {
             String to = keyIt.next();
-            Double rate = valueIt.next();
+            
+            if (!from.equalsIgnoreCase(to)) {
+                Double rate = valueIt.next();
+                Exchange e = findExchangeRate(from, to);
 
-            Exchange e = findExchangeRate(from, to);
-            if (e != null) {
-                e.editRate(rate, date, time, source);
+                if (e != null) {
+                    e.editRate(rate, date, time, source);
+                }
+                else {
+                    exchanges.add(new Exchange(from, to, rate, date, time, source));
+                }
             }
-            else {
-                exchanges.add(new Exchange(from, to, rate, date, time, source));
+            else { // This was required due to API Ayr sending Long as the first rate in JSON instead of Double
+                valueIt.next();
             }
         }
     }

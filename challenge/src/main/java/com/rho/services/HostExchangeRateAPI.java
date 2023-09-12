@@ -61,7 +61,7 @@ public class HostExchangeRateAPI implements APIInterface {
 			valueMap.put(Keys.SUCCESS, obj.get("success"));
 	        valueMap.put(Keys.RATES, obj.get("rates"));
 			valueMap.put(Keys.RESULT_DATE, obj.get("date"));
-			valueMap.put(Keys.API, "Host");
+			valueMap.put(Keys.API, APIType.HOST);
 			valueMap.put(Keys.CALL_EXECUTED, true);
 
             // Store the new fetched data.
@@ -97,7 +97,8 @@ public class HostExchangeRateAPI implements APIInterface {
 		valueMap.put(Keys.RATES, obj.get("rates"));
 		valueMap.put(Keys.RESULT_DATE, obj.get("date"));
 		valueMap.put(Keys.REQUEST_TIME, Connections.getCurrentTime());
-		valueMap.put(Keys.API, "Host");
+        valueMap.put(Keys.CALL_EXECUTED, true);
+		valueMap.put(Keys.API, APIType.HOST);
 
 		// Store the new fetched data.
 		db.saveData(valueMap);
@@ -122,7 +123,8 @@ public class HostExchangeRateAPI implements APIInterface {
 		valueMap.put(Keys.CURRENCY_FROM, from);
 		valueMap.put(Keys.CURRENCY_TO, to);
 		valueMap.put(Keys.ORIGINAL_AMOUNT, amount);
-		valueMap.put(Keys.REQUEST_TIME, Connections.getCurrentTime());
+		Map<String, Integer> time = Connections.getCurrentTime();
+        valueMap.put(Keys.REQUEST_TIME, time);
 
         // Check if there is an old exchange updated
 		if (oldExchange != null && !oldExchange.getOutdated()) {
@@ -146,10 +148,10 @@ public class HostExchangeRateAPI implements APIInterface {
 			valueMap.put(Keys.RATES, ((JSONObject) obj.get("info")).get("rate"));
         	valueMap.put(Keys.RESULT_DATE, obj.get("date"));
 			valueMap.put(Keys.CALL_EXECUTED, true);
-			valueMap.put(Keys.API, "Host");
+			valueMap.put(Keys.API, APIType.HOST);
 
 			// Store the new fetched data.
-			db.saveData(valueMap);
+			db.saveConversionData(from, to, amount, time, to, APIType.HOST);
 		}
 
 		return new JSONObject(valueMap);

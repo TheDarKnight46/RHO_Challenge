@@ -192,10 +192,33 @@ These were the extra features developed for the challenge.
 
 ### Reduce API Calls Mechanism
 
+To 
+
 Not implemented in GET all rates 
 
 ### Unit Testing
 
+To ensure the validity and strength of the code written, several unit tests were created.
+
+The tests written test several features of the application including all its API calls and its reduce call mechanism
+
+These are the methods written:
+
+- ```testGetAllRatesHost()```
+- ```testGetAllRatesAyr()```
+- ```testGetAllRatesCurrency()```
+- ```testSpecificRatesHost()```
+- ```testSpecificRatesAyr()```
+- ```testSpecificRatesCurrency()```
+- ```testConvertHost()```
+- ```testConvertAyr()```
+- ```testConvertCurrency()```
+- ```testConvertMultiHost()```
+- ```testConvertMultiAyr()```
+- ```testConvertMultiCurrency()```
+- ```testReduceCallMechanismTrue()```
+- ```testReduceCallMechanismAfterSave()```
+- ```testReduceCallMechanismFalse()```
 
 ### Interface
 
