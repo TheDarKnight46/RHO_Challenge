@@ -85,6 +85,7 @@ public class ExchangeRateController {
 
     // ========= CONVERT CURRENCY A TO MULTIPLE =========
 
+    @SuppressWarnings("unchecked")
     @GetMapping("/convert/multi/{from}&{targets}&{amount}")
     public JSONObject convertMultiCurrency(@PathVariable("from") String from, @PathVariable("targets") String targets, @PathVariable("amount") int amount) {
         JSONObject obj = null;
@@ -108,6 +109,7 @@ public class ExchangeRateController {
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     @GetMapping("/convert/multi/{api}/{from}&{targets}&{amount}")
     public JSONObject convertMultiCurrency(@PathVariable("from") String from, @PathVariable("targets") String targets, @PathVariable("amount") int amount, @PathVariable("api") String api) {
         JSONObject obj = null;
