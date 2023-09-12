@@ -189,6 +189,8 @@ This is the structure of the returned JSON Objects:
 
 These were the extra features developed for the challenge.
 
+Each method has its own *javadoc* to allow easy reference of its functionality
+
 ### Reduce API Calls Mechanism
 
 To 
@@ -205,19 +207,21 @@ These are the methods written:
 
 - ```testGetAllRatesHost()```
 - ```testGetAllRatesAyr()```
-- ```testGetAllRatesCurrency()```
+- ```testGetAllRatesMalformedParams()```
 - ```testSpecificRatesHost()```
 - ```testSpecificRatesAyr()```
-- ```testSpecificRatesCurrency()```
+- ```testSpecificRatesMalformedParams()```
 - ```testConvertHost()```
 - ```testConvertAyr()```
-- ```testConvertCurrency()```
+- ```testConvertMalformedParams()()```
 - ```testConvertMultiHost()```
 - ```testConvertMultiAyr()```
-- ```testConvertMultiCurrency()```
+- ```testConvertMultiMalformedParams()```
 - ```testReduceCallMechanismTrue()```
 - ```testReduceCallMechanismAfterSave()```
 - ```testReduceCallMechanismFalse()```
+
+**The code succeeded in all unit tests performed.**
 
 ### Interface
 

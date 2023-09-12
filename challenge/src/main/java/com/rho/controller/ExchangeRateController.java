@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.rho.model.APIType;
 import com.rho.model.ExchangeDB;
-import com.rho.model.Keys;
+import com.rho.model.enums.APIType;
+import com.rho.model.enums.Keys;
 import com.rho.services.AyrExchangeRateAPI;
 import com.rho.services.HostExchangeRateAPI;
 
@@ -29,6 +29,9 @@ public class ExchangeRateController {
     public String index() {
         return "Welcome";
     }
+
+    // TODO - SURROUND every method in a try catch
+    // TODO - change amount to int and test it 
 
     // ========= GET ALL RATES =========
 

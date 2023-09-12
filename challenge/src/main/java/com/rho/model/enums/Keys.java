@@ -1,4 +1,4 @@
-package com.rho.model;
+package com.rho.model.enums;
 
 public enum Keys {
     SUCCESS,
@@ -10,5 +10,6 @@ public enum Keys {
     RESULT_DATE,
     REQUEST_TIME,
     API,
-    CALL_EXECUTED
+    CALL_EXECUTED,
+    ERROR_MESSAGE
 }

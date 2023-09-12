@@ -7,10 +7,10 @@ import java.util.Map;
 import org.json.simple.JSONObject;
 import org.springframework.stereotype.Service;
 
-import com.rho.model.APIType;
 import com.rho.model.Exchange;
 import com.rho.model.ExchangeDB;
-import com.rho.model.Keys;
+import com.rho.model.enums.APIType;
+import com.rho.model.enums.Keys;
 
 //https://exchangerate.host/#/#docs
 
@@ -19,26 +19,34 @@ public class HostExchangeRateAPI implements APIInterface {
 
 	private final String baseUrl = "https://api.exchangerate.host/";
 	
-    
     public HostExchangeRateAPI() {}
 
 	/**
-	 * Get latest exchange rates for a specified currency and target
+	 * Get latest exchange rates for a specified currency and target.
+	 * @param db Database of class ExchangeDB storing all the exchange rates.
 	 * @param currency Currency from which to exchange.
 	 * @param target List of target currencies to get the exchange rate.
-	 * @param amount Amount of currency to exchange.
 	 * @return Result field of JsonObject as string.
 	 */
 	@Override
 	public JSONObject getExchangeRates(ExchangeDB db, String currency, String targets) {
+		// Check for format of Strings
+		if (!Check.isCurrencyCode(currency)) {
+			return new JSONObject(Check.formatWrongCurrencyFormatAnswer());
+		}
+		for (String t : targets.replaceAll(" ", "").split(targets)) {
+			if (!Check.isCurrencyCode(t)) {
+				return new JSONObject(Check.formatWrongCurrencyFormatAnswer());
+			}
+		}
+
 		Map<String, APIType> apiMap = new HashMap<>();
 		Map<String, String> dateMap = new HashMap<>();
 		Map<String, Double> ratesMap = new HashMap<>();
-		Map<Keys, Object> valueMap = new HashMap<>();
+		Map<Keys, Object> finalMap = new HashMap<>();
 
 		// Reduce Calls Mechanism
-		List<Exchange> oldExchanges = db.findUpdatedExchangeRate(currency, targets);
-
+		List<Exchange> oldExchanges = db.checkExchangeUpdateState(currency, targets);
 		for (Exchange e : oldExchanges) { // If list size is 0, loop is not executed.
 			String to = e.getTo();
 
@@ -47,10 +55,10 @@ public class HostExchangeRateAPI implements APIInterface {
 			ratesMap.put(to, e.getRate());
 		}
 
-		// Add standard data to value map
-		valueMap.put(Keys.CURRENCY_FROM, currency);
-		valueMap.put(Keys.CURRENCY_TO, targets);
-		valueMap.put(Keys.REQUEST_TIME, Connections.getCurrentTime());
+		// Add standard data to final map
+		finalMap.put(Keys.CURRENCY_FROM, currency);
+		finalMap.put(Keys.CURRENCY_TO, targets);
+		finalMap.put(Keys.REQUEST_TIME, Connections.getCurrentTime());
 
 		// Check if API call is still required
 		if (oldExchanges.size() < targets.replaceAll(" ", "").split(",").length) {
@@ -58,102 +66,117 @@ public class HostExchangeRateAPI implements APIInterface {
 			String urlStr = String.format("%s/latest?base=%s&symbols=%s", baseUrl, currency, targets);
 			JSONObject obj = Connections.requestAPICall(urlStr);
 
-			valueMap.put(Keys.SUCCESS, obj.get("success"));
-	        valueMap.put(Keys.RATES, obj.get("rates"));
-			valueMap.put(Keys.RESULT_DATE, obj.get("date"));
-			valueMap.put(Keys.API, APIType.HOST);
-			valueMap.put(Keys.CALL_EXECUTED, true);
+			finalMap.put(Keys.SUCCESS, obj.get("success"));
+	        finalMap.put(Keys.RATES, obj.get("rates"));
+			finalMap.put(Keys.RESULT_DATE, obj.get("date"));
+			finalMap.put(Keys.API, APIType.HOST);
+			finalMap.put(Keys.CALL_EXECUTED, true);
 
             // Store the new fetched data.
-			db.saveData(valueMap);
+			db.saveData(finalMap);
 		}
 		else {
-			// Add old data to value map
-			valueMap.put(Keys.SUCCESS, true);
-			valueMap.put(Keys.RATES, ratesMap);
-			valueMap.put(Keys.RESULT_DATE, dateMap);
-			valueMap.put(Keys.API, apiMap);
-			valueMap.put(Keys.CALL_EXECUTED, false);
+			// Add old data to final map
+			finalMap.put(Keys.SUCCESS, true);
+			finalMap.put(Keys.RATES, ratesMap);
+			finalMap.put(Keys.RESULT_DATE, dateMap);
+			finalMap.put(Keys.API, apiMap);
+			finalMap.put(Keys.CALL_EXECUTED, false);
 		}
 
-		return new JSONObject(valueMap);
+		return new JSONObject(finalMap);
 	}
 
 	/**
 	 * Get all latest exchange rates for a specified currency.
+	 * @param db Database of class ExchangeDB storing all the exchange rates.
 	 * @param currency Currency from which to exchange.
-	 * @param amount Amount of the currency to exchange.
 	 * @return Result field of JsonObject as string.
 	 */
 	@Override
 	public JSONObject getAllExchangeRates(ExchangeDB db, String currency) {
+		// Check for format of Strings
+		if (!Check.isCurrencyCode(currency)) {
+			return new JSONObject(Check.formatWrongCurrencyFormatAnswer());
+		}
+
 		String urlStr = String.format("%s/latest?base=%s", baseUrl, currency);
 		JSONObject obj = Connections.requestAPICall(urlStr);
 
-		Map<Keys, Object> valueMap = new HashMap<>();
+		Map<Keys, Object> finalMap = new HashMap<>();
 
-		valueMap.put(Keys.SUCCESS, obj.get("success"));
-		valueMap.put(Keys.CURRENCY_FROM, obj.get("base"));
-		valueMap.put(Keys.RATES, obj.get("rates"));
-		valueMap.put(Keys.RESULT_DATE, obj.get("date"));
-		valueMap.put(Keys.REQUEST_TIME, Connections.getCurrentTime());
-        valueMap.put(Keys.CALL_EXECUTED, true);
-		valueMap.put(Keys.API, APIType.HOST);
+		finalMap.put(Keys.SUCCESS, obj.get("success"));
+		finalMap.put(Keys.CURRENCY_FROM, obj.get("base"));
+		finalMap.put(Keys.RATES, obj.get("rates"));
+		finalMap.put(Keys.RESULT_DATE, obj.get("date"));
+		finalMap.put(Keys.REQUEST_TIME, Connections.getCurrentTime());
+        finalMap.put(Keys.CALL_EXECUTED, true);
+		finalMap.put(Keys.API, APIType.HOST);
 
 		// Store the new fetched data.
-		db.saveData(valueMap);
+		db.saveData(finalMap);
 
-		return new JSONObject(valueMap);		
+		return new JSONObject(finalMap);		
 	}
 
 	/**
 	 * Convert currency from one to another.
+	 * @param db Database of class ExchangeDB storing all the exchange rates.
 	 * @param from Currency from which to convert.
 	 * @param to Currency to convert to.
+	 * @param amount Amount of the first currency to convert to the second.
 	 * @return Result field of JsonObject as string.
 	 */
 	@Override
-	public JSONObject convertCurrency(ExchangeDB db, String from, String to, int amount) {
-		Map<Keys, Object> valueMap = new HashMap<>();
+	public JSONObject convertCurrency(ExchangeDB db, String from, String to, double amount) {
+		// Check for format of Strings
+		if (!Check.isCurrencyCode(from)) {
+			return new JSONObject(Check.formatWrongCurrencyFormatAnswer());
+		}
+		if (!Check.isCurrencyCode(to)) {
+			return new JSONObject(Check.formatWrongCurrencyFormatAnswer());
+		}
+
+		Map<Keys, Object> finalMap = new HashMap<>();
 
 		// Reduce Calls Mechanism
 		Exchange oldExchange = db.findExchangeRate(from, to);
 		
-        // Add standard data to value map
-		valueMap.put(Keys.CURRENCY_FROM, from);
-		valueMap.put(Keys.CURRENCY_TO, to);
-		valueMap.put(Keys.ORIGINAL_AMOUNT, amount);
+        // Add standard data to final map
+		finalMap.put(Keys.CURRENCY_FROM, from);
+		finalMap.put(Keys.CURRENCY_TO, to);
+		finalMap.put(Keys.ORIGINAL_AMOUNT, amount);
 		Map<String, Integer> time = Connections.getCurrentTime();
-        valueMap.put(Keys.REQUEST_TIME, time);
+        finalMap.put(Keys.REQUEST_TIME, time);
 
         // Check if there is an old exchange updated
 		if (oldExchange != null && !oldExchange.getOutdated()) {
-			// Add old data to value map
+			// Add old data to final map
 			double rate = oldExchange.getRate();
 
-			valueMap.put(Keys.SUCCESS, true);
-			valueMap.put(Keys.RESULT, rate*amount);
-			valueMap.put(Keys.RATES, rate);
-			valueMap.put(Keys.RESULT_DATE, oldExchange.getDate());
-			valueMap.put(Keys.CALL_EXECUTED, false);
-			valueMap.put(Keys.API, oldExchange.getSource());
+			finalMap.put(Keys.SUCCESS, true);
+			finalMap.put(Keys.RESULT, rate*amount);
+			finalMap.put(Keys.RATES, rate);
+			finalMap.put(Keys.RESULT_DATE, oldExchange.getDate());
+			finalMap.put(Keys.CALL_EXECUTED, false);
+			finalMap.put(Keys.API, oldExchange.getSource());
 		} 
 		else {
 			// Request new data from API
 			String urlStr = String.format("%s/convert?from=%s&to=%s&amount=%d", baseUrl, from, to, amount);
 			JSONObject obj = Connections.requestAPICall(urlStr);
 			
- 			valueMap.put(Keys.SUCCESS, obj.get("success"));
-        	valueMap.put(Keys.RESULT, obj.get("result"));
-			valueMap.put(Keys.RATES, ((JSONObject) obj.get("info")).get("rate"));
-        	valueMap.put(Keys.RESULT_DATE, obj.get("date"));
-			valueMap.put(Keys.CALL_EXECUTED, true);
-			valueMap.put(Keys.API, APIType.HOST);
+ 			finalMap.put(Keys.SUCCESS, obj.get("success"));
+        	finalMap.put(Keys.RESULT, obj.get("result"));
+			finalMap.put(Keys.RATES, ((JSONObject) obj.get("info")).get("rate"));
+        	finalMap.put(Keys.RESULT_DATE, obj.get("date"));
+			finalMap.put(Keys.CALL_EXECUTED, true);
+			finalMap.put(Keys.API, APIType.HOST);
 
 			// Store the new fetched data.
 			db.saveConversionData(from, to, amount, time, to, APIType.HOST);
 		}
 
-		return new JSONObject(valueMap);
+		return new JSONObject(finalMap);
 	}
 }

@@ -11,9 +11,9 @@ import org.json.simple.JSONObject;
 import org.junit.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.rho.model.APIType;
 import com.rho.model.ExchangeDB;
-import com.rho.model.Keys;
+import com.rho.model.enums.APIType;
+import com.rho.model.enums.Keys;
 import com.rho.services.AyrExchangeRateAPI;
 import com.rho.services.Connections;
 import com.rho.services.HostExchangeRateAPI;
@@ -49,6 +49,18 @@ public class ExchangeRateSpringTests {
         assertTrue((boolean) obj.get(Keys.CALL_EXECUTED));
         assertTrue((boolean) obj.get(Keys.SUCCESS));
         assertEquals((APIType) obj.get(Keys.API), APIType.AYR);
+    }
+
+    @Test
+    public void testGetAllRatesMalformedParams() {
+        ExchangeDB db = new ExchangeDB();
+        HostExchangeRateAPI api = new HostExchangeRateAPI();
+        String currency = "US";
+
+        JSONObject obj = api.getAllExchangeRates(db, currency);
+
+        assertFalse((boolean) obj.get(Keys.SUCCESS));
+        assertFalse((boolean) obj.get(Keys.CALL_EXECUTED));
     }
 
     // ========= GET SPECIFIC RATES =========
@@ -95,6 +107,19 @@ public class ExchangeRateSpringTests {
         assertTrue(rates.containsKey("GBP"));
     }
 
+    @Test
+    public void testSpecificRatesMalformedParams() {
+        ExchangeDB db = new ExchangeDB();
+        AyrExchangeRateAPI api = new AyrExchangeRateAPI();
+        String currency = "EU";
+        String targets = "USD,GBP,CAD";
+
+        JSONObject obj = api.getExchangeRates(db, currency, targets);
+
+        assertFalse((boolean) obj.get(Keys.SUCCESS));
+        assertFalse((boolean) obj.get(Keys.CALL_EXECUTED));
+    }
+
     // ========= CONVERT CURRENCY A TO B =========
 
     @Test
@@ -103,7 +128,7 @@ public class ExchangeRateSpringTests {
         HostExchangeRateAPI api = new HostExchangeRateAPI();
         String from = "EUR";
         String to = "JPY";
-        int amount = 1523;
+        double amount = 1523.0;
 
         JSONObject obj = api.convertCurrency(db, from, to, amount);
 
@@ -120,7 +145,7 @@ public class ExchangeRateSpringTests {
         AyrExchangeRateAPI api = new AyrExchangeRateAPI();
         String from = "EUR";
         String to = "USD";
-        int amount = 589;
+        double amount = 589.0;
 
         JSONObject obj = api.convertCurrency(db, from, to, amount);
 
@@ -131,6 +156,23 @@ public class ExchangeRateSpringTests {
         assertEquals(632.5, (double) obj.get(Keys.RESULT), 100);
     }
 
+    @Test
+    public void testConvertMalformedParams() {
+        ExchangeDB db = new ExchangeDB();
+        HostExchangeRateAPI api = new HostExchangeRateAPI();
+        String from = "EUR";
+        String to = "JPY";
+        double amount = 1523.0;
+
+        JSONObject obj = api.convertCurrency(db, from, to, amount);
+
+        assertTrue((boolean) obj.get(Keys.SUCCESS));
+        assertTrue((boolean) obj.get(Keys.CALL_EXECUTED));
+        assertEquals(from, (String) obj.get(Keys.CURRENCY_FROM));
+        assertEquals(to, (String) obj.get(Keys.CURRENCY_TO));
+        assertEquals(240011, (double) obj.get(Keys.RESULT), 1000);
+    }
+
     // ========= CONVERT CURRENCY A TO MULTIPLE =========
 
     @Test
@@ -139,7 +181,7 @@ public class ExchangeRateSpringTests {
         HostExchangeRateAPI api = new HostExchangeRateAPI();
         String from = "EUR";
         String to = "USD,GBP,JPY";
-        int amount = 756;
+        double amount = 756.0;
         
         JSONObject obj = null;
         Map<String, Double> currencyMap = new HashMap<>();
@@ -189,6 +231,21 @@ public class ExchangeRateSpringTests {
         assertTrue((boolean) currencyMap.containsKey("USD"));
         assertTrue((boolean) currencyMap.containsKey("GBP"));
         assertTrue((boolean) currencyMap.containsKey("JPY"));
+    }
+
+    @Test
+    public void testConvertMultiMalformedParams() {
+        ExchangeDB db = new ExchangeDB();
+        AyrExchangeRateAPI api = new AyrExchangeRateAPI();
+        String from = "EU";
+        String to = "USD,GBP,JPY";
+        int amount = 756;
+        
+        JSONObject obj = api.convertCurrency(db, from, to, amount);;
+
+        assertTrue(obj != null);
+        assertFalse((boolean) obj.get(Keys.SUCCESS));
+        assertFalse((boolean) obj.get(Keys.CALL_EXECUTED));
     } 
 
     // ========= OTHER =========

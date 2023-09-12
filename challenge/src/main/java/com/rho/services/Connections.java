@@ -18,7 +18,7 @@ import org.json.simple.parser.ParseException;
 public abstract class Connections {
 	
     /**
-	 * Parses an HttpURLConncetion request to a JSONObject.
+	 * Parses an HttpURLConnection request to a JSONObject.
 	 * @param request HttpURLConnection. Request must be connected before sending as parameter.
 	 * @return JsonObject extracted from the request.
 	 */

@@ -1,5 +1,6 @@
 package com.rho.model;
 
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Iterator;
@@ -8,10 +9,15 @@ import java.util.Set;
 
 import org.json.simple.JSONObject;
 
+import com.rho.model.enums.APIType;
+import com.rho.model.enums.Keys;
+
 public class ExchangeDB {
     private List<Exchange> exchanges = new ArrayList<>();
 
-    public List<Exchange> findUpdatedExchangeRate(String from, String target) {
+    public List<Exchange> checkExchangeUpdateState(String from, String target) {
+        updateExchangeStates(from, target);
+
         List<Exchange> storedExchanges = new ArrayList<>();
 
         for (Exchange e : exchanges) {
@@ -25,6 +31,31 @@ public class ExchangeDB {
         }
 
         return storedExchanges;
+    }
+
+    private void updateExchangeStates(String from, String target) {
+        for (String t : target.replaceAll(" ", "target").split(",")) {
+            Exchange exchange = findExchangeRate(from, t);
+            
+            LocalTime now = LocalTime.now();
+            int hour, min;
+
+            hour = now.getHour();
+            min = now.getMinute();
+
+            if ((int) exchange.getRequestTime().get("hour") > hour || (int) exchange.getRequestTime().get("hour") < hour) {
+                exchange.setOutdated(true);
+            }
+            else {
+                int dif = min - (int) exchange.getRequestTime().get("min");
+                if (dif >= 1) {
+                    exchange.setOutdated(true);
+                }
+                else {
+                    exchange.setOutdated(false);
+                }
+            }
+        }
     }
 
     public Exchange findExchangeRate(String from, String to) {

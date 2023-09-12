@@ -5,6 +5,8 @@ import java.util.Map;
 
 import org.json.simple.JSONObject;
 
+import com.rho.model.enums.APIType;
+
 public class Exchange {
     private APIType source;
     private String from, to;
