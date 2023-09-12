@@ -8,12 +8,12 @@ import org.json.simple.JSONObject;
 public class Exchange {
     private APIType source;
     private String from, to;
-    private float rate;
+    private double rate;
     private Map<String, Integer> time;
     private String date;
     private boolean outdated = false;
 
-    public Exchange(String from, String to, float rate, String date, Map<String, Integer> time, APIType source) {
+    public Exchange(String from, String to, double rate, String date, Map<String, Integer> time, APIType source) {
         this.from = from;
         this.to = to;
         this.rate = rate;
@@ -22,11 +22,12 @@ public class Exchange {
         this.source = source;
     }
 
-    public void editRate(float rate, String date, Map<String, Integer> time, APIType source) {
+    public void editRate(double rate, String date, Map<String, Integer> time, APIType source) {
         this.rate = rate;
         this.date = date;
         this.time = time;
         this.source = source;
+        this.outdated = false;
     }
 
     public String getFrom() {
@@ -41,7 +42,11 @@ public class Exchange {
         return time;
     }
 
-    public void toggleOutdated(boolean flag) {
+    public APIType getSource() {
+        return source;
+    }
+
+    public void setOutdated(boolean flag) {
         outdated = flag;
     }
 
@@ -49,7 +54,15 @@ public class Exchange {
         return outdated;
     }
 
-    public JSONObject getRate() {
+    public String getDate() {
+        return date;
+    }
+
+    public double getRate() {
+        return rate;
+    }
+
+    public JSONObject getExchange() {
         Map<String, Object> values = new HashMap<>();
 
         values.put("From", from);
@@ -60,5 +73,10 @@ public class Exchange {
         values.put("Source", source);
 
         return new JSONObject(values);
+    }
+
+    @Override
+    public String toString() {
+        return getExchange().toJSONString();
     }
 }

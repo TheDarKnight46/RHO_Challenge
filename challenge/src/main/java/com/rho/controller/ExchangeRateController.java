@@ -1,5 +1,6 @@
 package com.rho.controller;
 
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -11,12 +12,15 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.rho.model.APIType;
+import com.rho.model.ExchangeDB;
 import com.rho.model.Keys;
 import com.rho.services.AyrExchangeRateAPI;
 import com.rho.services.HostExchangeRateAPI;
 
 @RestController
 public class ExchangeRateController {
+
+    private ExchangeDB db = new ExchangeDB();
 
     private HostExchangeRateAPI hostAPI = new HostExchangeRateAPI();
     private AyrExchangeRateAPI ayrAPI = new AyrExchangeRateAPI();
@@ -30,16 +34,16 @@ public class ExchangeRateController {
 
     @GetMapping("/rates/all/{currency}") 
     public JSONObject getAllExchangeRates(@PathVariable("currency") String currency) {
-        return hostAPI.getAllExchangeRates(currency);
+        return hostAPI.getAllExchangeRates(db, currency);
     }
 
     @GetMapping("/rates/all/{api}/{currency}")
     public JSONObject getAllExchangeRates(@PathVariable("currency") String currency, @PathVariable("api") String api) {
         switch (getEnumApiType(api)) {
             case HOST:
-                return hostAPI.getAllExchangeRates(currency);
+                return hostAPI.getAllExchangeRates(db, currency);
             case AYR:
-                return ayrAPI.getAllExchangeRates(currency);
+                return ayrAPI.getAllExchangeRates(db, currency);
             default:
                 return null;
         }        
@@ -49,16 +53,18 @@ public class ExchangeRateController {
 
     @GetMapping("/rates/{currency}&{targets}")
     public JSONObject getExchangeRates(@PathVariable("currency") String currency, @PathVariable("targets") String targets) {
-        return hostAPI.getExchangeRates(currency, targets);
+        return hostAPI.getExchangeRates(db, currency, targets);
     }
 
     @GetMapping("/rates/{api}/{currency}&{targets}")
     public JSONObject getExchangeRates(@PathVariable("currency") String currency, @PathVariable("targets") String targets, @PathVariable("api") String api) {
+        String symbols = targets.replaceAll(" ", "");
+        
         switch (getEnumApiType(api)) {
             case HOST:
-                return hostAPI.getExchangeRates(currency, targets);
+                return hostAPI.getExchangeRates(db, currency, symbols);
             case AYR:
-                return ayrAPI.getExchangeRates(currency, targets);
+                return ayrAPI.getExchangeRates(db, currency, symbols);
             default:
                 return null;
         }
@@ -68,16 +74,16 @@ public class ExchangeRateController {
 
     @GetMapping("/convert/{from}&{to}&{amount}")
     public JSONObject convertCurrency(@PathVariable("from") String from, @PathVariable("to") String to, @PathVariable("amount") int amount) {
-        return hostAPI.convertCurrency(from, to, amount);
+        return hostAPI.convertCurrency(db, from, to, amount);
     }
 
     @GetMapping("/convert/{api}/{from}&{to}&{amount}")
     public JSONObject convertCurrency(@PathVariable("from") String from, @PathVariable("to") String to, @PathVariable("amount") int amount, @PathVariable("api") String api) {
         switch (getEnumApiType(api)) {
             case HOST:
-                return hostAPI.convertCurrency(from, to, amount);
+                return hostAPI.convertCurrency(db, from, to, amount);
             case AYR:
-                return ayrAPI.convertCurrency(from, to, amount);
+                return ayrAPI.convertCurrency(db, from, to, amount);
             default:
                 return null;
         }
@@ -89,12 +95,12 @@ public class ExchangeRateController {
     @GetMapping("/convert/multi/{from}&{targets}&{amount}")
     public JSONObject convertMultiCurrency(@PathVariable("from") String from, @PathVariable("targets") String targets, @PathVariable("amount") int amount) {
         JSONObject obj = null;
-        ArrayList<String> symbols = new ArrayList<>(Arrays.asList(targets.split(",")));
+        ArrayList<String> symbols = new ArrayList<>(Arrays.asList(targets.replaceAll(" ", "").split(",")));
         Map<String, Double> currencyMap = new HashMap<>();
         Map<String, Double> ratesMap = new HashMap<>();
 
         for (String str : symbols) {
-            obj = hostAPI.convertCurrency(from, str, amount);
+            obj = hostAPI.convertCurrency(db, from, str, amount);
             currencyMap.put(str, (Double) obj.get(Keys.RESULT));
             ratesMap.put(str, (Double) obj.get(Keys.RATES));
         }
@@ -113,7 +119,7 @@ public class ExchangeRateController {
     @GetMapping("/convert/multi/{api}/{from}&{targets}&{amount}")
     public JSONObject convertMultiCurrency(@PathVariable("from") String from, @PathVariable("targets") String targets, @PathVariable("amount") int amount, @PathVariable("api") String api) {
         JSONObject obj = null;
-        ArrayList<String> symbols = new ArrayList<>(Arrays.asList(targets.split(",")));
+        ArrayList<String> symbols = new ArrayList<>(Arrays.asList(targets.replaceAll(" ", "").split(",")));
         Map<String, Float> currencyMap = new HashMap<>();
         Map<String, Float> ratesMap = new HashMap<>();
 
@@ -121,10 +127,10 @@ public class ExchangeRateController {
         for (String str : symbols) {
             switch (getEnumApiType(api)) {
                 case HOST:
-                    obj = hostAPI.convertCurrency(from, str, amount);
+                    obj = hostAPI.convertCurrency(db, from, str, amount);
                     break;
                 case AYR:
-                    obj = ayrAPI.convertCurrency(from, str, amount);
+                    obj = ayrAPI.convertCurrency(db, from, str, amount);
                     break;
                 default:
                     break;
@@ -149,7 +155,7 @@ public class ExchangeRateController {
     // ========= OTHER METHODS =========
 
     private APIType getEnumApiType(String type) {
-        switch (type) {
+        switch (type.toLowerCase().trim()) {
             case "host":
                 return APIType.HOST;
             case "ayr":

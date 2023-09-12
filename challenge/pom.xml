@@ -12,7 +12,7 @@
 	<artifactId>challenge</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>challenge</name>
-	<description>Demo project for Spring Boot</description>
+	<description>RHO Spring Challenge</description>
 	<properties>
 		<java.version>20</java.version>
 	</properties>
@@ -28,7 +28,6 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/com.googlecode.json-simple/json-simple -->
 		<dependency>
 			<groupId>com.googlecode.json-simple</groupId>
 			<artifactId>json-simple</artifactId>

@@ -129,7 +129,7 @@ localhost:8080/rates/{api}/{currency}&{targets}
 
 It can be ```host```, ```ayr``` or ```currency```.
 
-**Get value conversion from Currency A to Currency B**
+**Get value conversion from Currency A to Currency B:**
 
 ```
 localhost:8080/convert/{from}&{to}&{amount}
@@ -145,7 +145,7 @@ localhost:8080/convert/{api}/{from}&{to}&{amount}
 
 It can be ```host```, ```ayr``` or ```currency```.
 
-**Get value conversion from Currency A to a list of supplied currencies**
+**Get value conversion from Currency A to a list of supplied currencies:**
 
 ```
 localhost:8080/convert/multi/{from}&{targets}&{amount}
@@ -159,6 +159,29 @@ localhost:8080/convert/multi/{api}/{from}&{targets}&{amount}
 
 It can be ```host```, ```ayr``` or ```currency```.
 
+## JSON Objects Structure
+
+This is the structure of the returned JSON Objects:
+
+```json
+{
+    "SUCCESS": ,
+    "REQUEST_TIME": {
+        "Hour": ,
+        "Minute": ,
+        "Second": ,
+    },
+    "CALL_EXECUTED": , // Because of the Reduce Call Mechanism
+    "CURRENCY_FROM": ,
+    "CURRENCY_TO": , 
+    "ORIGINAL_AMOUNT": , // Exclusive to conversion method returns
+    "RESULT": , // Exclusive to conversion method returns
+    "RATES": ,
+    "RESULT_DATE": ,
+    "API": 
+}
+```
+
 ## SwaggerHub Documentation
 
 
@@ -166,9 +189,10 @@ It can be ```host```, ```ayr``` or ```currency```.
 ## Extra Features
 
 These were the extra features developed for the challenge.
-### Reduce API calls mechanism
 
+### Reduce API Calls Mechanism
 
+Not implemented in GET all rates 
 
 ### Unit Testing
 

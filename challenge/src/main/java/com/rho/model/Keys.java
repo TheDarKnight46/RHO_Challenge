@@ -9,5 +9,6 @@ public enum Keys {
     RATES,
     RESULT_DATE,
     REQUEST_TIME,
-    API
+    API,
+    CALL_EXECUTED
 }

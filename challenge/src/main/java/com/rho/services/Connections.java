@@ -63,4 +63,14 @@ public abstract class Connections {
 
 		return time;
 	}
+
+	public static String formatRequestTime(Map<String, Integer> time) {
+		StringBuilder str = new StringBuilder();
+
+		str.append(time.get("hour")).append(":");
+		str.append(time.get("min")).append(":");
+		str.append(time.get("sec"));
+
+		return str.toString();
+	}
 }
