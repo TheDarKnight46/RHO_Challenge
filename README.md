@@ -73,11 +73,10 @@ The application will start and the REST API will be hosted on ```localhost:8080`
 
 ## Exchange Rate APIs used
 
-In order to get a bigger sample of Exchange Rates, 3 API were used.
+In order to get a bigger sample of Exchange Rates, 2 API were used.
 
 1. *host* - https://exchangerate.host. 
 2. *ayr* - https://www.exchangerate-api.com *Account required for API key*.
-3. *currency* - https://currencyapi.com *Account required for API key*.
 
 The main API used by default is ```1.``` since is has the least restraints on the number of monthly API calls.
 
@@ -109,7 +108,7 @@ Alternatively you can specify the API used with:
 localhost:8080/rates/all/{api}/{currency}
 ```
 
-It can be ```host```, ```ayr``` or ```currency```.
+It can be ```host``` or ```ayr```.
 
 **Get exchange rate from Currency A to Currency B:**
 
@@ -127,7 +126,7 @@ Alternatively you can specify the API used with:
 localhost:8080/rates/{api}/{currency}&{targets}
 ```
 
-It can be ```host```, ```ayr``` or ```currency```.
+It can be ```host``` or ```ayr```.
 
 **Get value conversion from Currency A to Currency B:**
 
@@ -143,7 +142,7 @@ Alternatively you can specify the API used with:
 localhost:8080/convert/{api}/{from}&{to}&{amount}
 ```
 
-It can be ```host```, ```ayr``` or ```currency```.
+It can be ```host``` or ```ayr```.
 
 **Get value conversion from Currency A to a list of supplied currencies:**
 
@@ -157,7 +156,7 @@ The ```from``` parameter represent the currency code to convert from. The ```tar
 localhost:8080/convert/multi/{api}/{from}&{targets}&{amount}
 ```
 
-It can be ```host```, ```ayr``` or ```currency```.
+It can be ```host``` or ```ayr```.
 
 ## JSON Objects Structure
 

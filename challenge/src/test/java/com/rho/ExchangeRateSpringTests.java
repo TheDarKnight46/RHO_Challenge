@@ -50,11 +50,6 @@ public class ExchangeRateSpringTests {
         assertTrue((boolean) obj.get(Keys.SUCCESS));
         assertEquals((APIType) obj.get(Keys.API), APIType.AYR);
     }
-    
-    @Test
-    public void testGetAllRatesCurrency() {
-
-    }
 
     // ========= GET SPECIFIC RATES =========
 
@@ -100,11 +95,6 @@ public class ExchangeRateSpringTests {
         assertTrue(rates.containsKey("GBP"));
     }
 
-    @Test
-    public void testSpecificRatesCurrency() {
-
-    }
-
     // ========= CONVERT CURRENCY A TO B =========
 
     @Test
@@ -139,11 +129,6 @@ public class ExchangeRateSpringTests {
         assertEquals(from, (String) obj.get(Keys.CURRENCY_FROM));
         assertEquals(to, (String) obj.get(Keys.CURRENCY_TO));
         assertEquals(632.5, (double) obj.get(Keys.RESULT), 100);
-    }
-
-    @Test
-    public void testConvertCurrency() {
-        
     }
 
     // ========= CONVERT CURRENCY A TO MULTIPLE =========
@@ -204,11 +189,6 @@ public class ExchangeRateSpringTests {
         assertTrue((boolean) currencyMap.containsKey("USD"));
         assertTrue((boolean) currencyMap.containsKey("GBP"));
         assertTrue((boolean) currencyMap.containsKey("JPY"));
-    } 
-
-    @Test
-    public void testConvertMultiCurrency() {
-        
     } 
 
     // ========= OTHER =========
