@@ -5,17 +5,17 @@ This is a detailed explanation of the implementation and installation process pe
 - Developed in a VS Code environment with the Spring Boot Extension package and Java Extension package. 
     - Spring Package ID: *vmware.vscode-boot-dev-pack*; 
     - Java Package ID: *vscjava.vscode-java-pack*.
-- Maven version 3.9.4 was used to create and run the project.
-- Java 20 was used to develop the application.
+- *Maven* version 3.9.4 was used to create and run the project.
+- *Java 20* was used to develop the application.
 
 > [!NOTE]
 > This project was developed using Windows 11.
 
 ## Installing Java
 
-Go to https://www.oracle.com/pt/java/technologies/downloads/#java20 and download the JDK.
+Go to https://www.oracle.com/pt/java/technologies/downloads/#java20, download the JDK and install it.
 
-Open terminal window and check Java version using:
+When complete, open terminal window and check Java version using:
 
 ```shell script
 java -version
@@ -34,11 +34,13 @@ Java HotSpot(TM) 64-Bit Server VM (build 20.0.2+9-78, mixed mode, sharing)
 
 ## Installing Maven
 
-Download Maven v3.9.4 from the website: https://maven.apache.org/download.cgi.
+Download *Maven* v3.9.4 from the website: https://maven.apache.org/download.cgi.
+
+Place the downloaded folder in a protected directory so not to delete or alter it by accident.
 
 Next step is to setup the environment variables. It can be done following this guide: https://phoenixnap.com/kb/install-maven-windows.
 
-Open a terminal window and check Maven version using:
+Open a terminal window and check *Maven* version using:
 
 ```shell script
 mvn -version
@@ -70,6 +72,10 @@ mvn spring-boot:run
 ```
 
 The application will start and the REST API will be hosted on ```localhost:8080```.
+
+When opened the main root method has only the URL for the *Swagger UI*.
+
+For this project, the *Swagger UI* will serve as front end for documentation and usage.
 
 ## Exchange Rate APIs used
 
@@ -158,9 +164,9 @@ localhost:8080/convert/multi/{api}/{from}&{targets}&{amount}
 
 It can be ```host``` or ```ayr```.
 
-## Request Answer Object Structure (Main Schema)
+## RequestAnswer Object Structure (Main Schema)
 
-This is the structure of the returned Request Answer Objects:
+This is the structure of the returned RequestAnswer Objects:
 
 ```java
 {
@@ -175,6 +181,8 @@ This is the structure of the returned Request Answer Objects:
     private Map<String, APIType> api;
 }
 ```
+
+It stores all the information when an exchange rate or conversion is requested.
 
 ## Swagger Documentation
 
