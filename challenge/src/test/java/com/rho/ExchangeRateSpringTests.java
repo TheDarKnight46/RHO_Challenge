@@ -24,6 +24,9 @@ public class ExchangeRateSpringTests {
     
     // ========= GET ALL RATES =========
 
+    /**
+     * Test get all exchange rates request using the Host API
+     */
     @Test
     public void testGetAllRatesHost() {
         ExchangeDB db = new ExchangeDB();
@@ -38,6 +41,9 @@ public class ExchangeRateSpringTests {
         assertEquals(obj.getApi().values().iterator().next(), APIType.HOST);
     }
 
+    /**
+     * Test get all exchange rates request using the Ayr API
+     */
     @Test
     public void testGetAllRatesAyr() {
         ExchangeDB db = new ExchangeDB();
@@ -52,6 +58,9 @@ public class ExchangeRateSpringTests {
         assertEquals(obj.getApi().values().iterator().next(), APIType.AYR);
     }
 
+    /**
+     * Test get all exchange rates request using the Host API with malformed parameters
+     */
     @Test
     public void testGetAllRatesMalformedParams() {
         ExchangeDB db = new ExchangeDB();
@@ -66,6 +75,9 @@ public class ExchangeRateSpringTests {
 
     // ========= GET SPECIFIC RATES =========
 
+    /**
+     * Test get specific exchange rates request using the Host API
+     */
     @Test
     public void testSpecificRatesHost() {
         ExchangeDB db = new ExchangeDB();
@@ -87,6 +99,9 @@ public class ExchangeRateSpringTests {
         assertTrue(rates.containsKey("GBP"));
     }
 
+    /**
+     * Test get specific exchange rates request using the Ayr API
+     */
     @Test
     public void testSpecificRatesAyr() {
         ExchangeDB db = new ExchangeDB();
@@ -108,6 +123,9 @@ public class ExchangeRateSpringTests {
         assertTrue(rates.containsKey("GBP"));
     }
 
+    /**
+     * Test get specific exchange rates request using the Host API with malformed parameters
+     */
     @Test
     public void testSpecificRatesMalformedParams() {
         ExchangeDB db = new ExchangeDB();
@@ -123,6 +141,9 @@ public class ExchangeRateSpringTests {
 
     // ========= CONVERT CURRENCY A TO B =========
 
+    /**
+     * Test A to B currency conversion using the Host API
+     */
     @Test
     public void testConvertHost() {
         ExchangeDB db = new ExchangeDB();
@@ -140,6 +161,9 @@ public class ExchangeRateSpringTests {
         assertEquals(240011, obj.getResults().values().iterator().next(), 1000);
     }
 
+    /**
+     * Test A to B currency conversion using the Ayr API
+     */
     @Test
     public void testConvertAyr() {
         ExchangeDB db = new ExchangeDB();
@@ -157,6 +181,9 @@ public class ExchangeRateSpringTests {
         assertEquals(632.5, obj.getResults().values().iterator().next(), 100);
     }
 
+    /**
+     * Test A to B currency conversion using the Host API with malformed parameters
+     */
     @Test
     public void testConvertMalformedParams() {
         ExchangeDB db = new ExchangeDB();
@@ -173,6 +200,9 @@ public class ExchangeRateSpringTests {
 
     // ========= CONVERT CURRENCY A TO MULTIPLE =========
 
+    /**
+     * Test A to multiple currency conversion using the Host API
+     */
     @Test
     public void testConvertMultiHost() {
         ExchangeDB db = new ExchangeDB();
@@ -201,6 +231,9 @@ public class ExchangeRateSpringTests {
         assertTrue(answer.getRates().containsKey("JPY"));
     }   
     
+    /**
+     * Test A to multiple currency conversion using the Ayr API
+     */
     @Test
     public void testConvertMultiAyr() {
         ExchangeDB db = new ExchangeDB();
@@ -229,6 +262,9 @@ public class ExchangeRateSpringTests {
         assertTrue(answer.getRates().containsKey("JPY"));
     }
 
+    /**
+     * Test A to multiple currency conversion using the Host API with malformed parameters
+     */
     @Test
     public void testConvertMultiMalformedParams() {
         ExchangeDB db = new ExchangeDB();
@@ -245,6 +281,9 @@ public class ExchangeRateSpringTests {
 
     // ========= OTHER =========
 
+    /**
+     * Test reduce call mechanism with brand new data inserted less than 1 min prior.
+     */
     @Test
     public void testReduceCallMechanismTrue() {
         ExchangeDB db = new ExchangeDB();
@@ -261,6 +300,10 @@ public class ExchangeRateSpringTests {
         assertFalse(obj.isCallExecuted());
     }
 
+    /**
+     * Test reduce call mechanism with 2 fetches to confirm working conditions. 
+     * First fetch does not have all data so it fetches. Second fetch it has all data and does not fetch. 
+     */
     @Test
     public void testReduceCallMechanismAfterSave() {
         ExchangeDB db = new ExchangeDB();
@@ -281,6 +324,9 @@ public class ExchangeRateSpringTests {
         assertFalse(obj2.isCallExecuted());
     }
 
+    /**
+     * Test reduce call mechanism with insufficient data.
+     */
     @Test
     public void testReduceCallMechanismFalse() {
         ExchangeDB db = new ExchangeDB();
@@ -296,6 +342,9 @@ public class ExchangeRateSpringTests {
         assertTrue(obj.isCallExecuted());
     }
 
+    /**
+     * Test reduce call mechanism with data 2 min old.
+     */
     @Test
     public void testReduceCallMechanismWait() {
         ExchangeDB db = new ExchangeDB();
@@ -304,7 +353,7 @@ public class ExchangeRateSpringTests {
 		Map<String, Integer> time = new HashMap<>();
 		
 		time.put("Hour", now.getHour());
-		time.put("Minute", now.getMinute()-2);
+		time.put("Minute", now.getMinute()-2); // 2 min old
 		time.put("Seconds", now.getSecond());
 
         db.addExchangeRate("EUR", "USD", 1.074362, "2023-09-12", time, APIType.HOST);
