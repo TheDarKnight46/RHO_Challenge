@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -294,6 +295,27 @@ public class ExchangeRateSpringTests {
 		
         db.addExchangeRate("EUR", "GBP", 1.074362, "2023-09-12", time, APIType.HOST);
         db.addExchangeRate("EUR", "CHF", 1.074362, "2023-09-12", time, APIType.HOST);
+
+        JSONObject obj = api.getExchangeRates(db, "EUR", "USD,GBP,CHF");
+
+        assertTrue((boolean) obj.get(Keys.SUCCESS));
+        assertTrue((boolean) obj.get(Keys.CALL_EXECUTED));
+    }
+
+    @Test
+    public void testReduceCallMechanismWait() {
+        ExchangeDB db = new ExchangeDB();
+        HostExchangeRateAPI api = new HostExchangeRateAPI();
+        LocalTime now = LocalTime.now();
+		Map<String, Integer> time = new HashMap<>();
+		
+		time.put("Hour", now.getHour());
+		time.put("Minute", now.getMinute()-2);
+		time.put("Seconds", now.getSecond());
+
+        db.addExchangeRate("EUR", "USD", 1.074362, "2023-09-12", time, APIType.HOST);
+        db.addExchangeRate("EUR", "GBP", 0.85876, "2023-09-12", time, APIType.HOST);
+        db.addExchangeRate("EUR", "CHF", 0.957468, "2023-09-12", time, APIType.HOST);
 
         JSONObject obj = api.getExchangeRates(db, "EUR", "USD,GBP,CHF");
 

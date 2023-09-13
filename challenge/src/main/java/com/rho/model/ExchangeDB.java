@@ -15,6 +15,12 @@ import com.rho.model.enums.Keys;
 public class ExchangeDB {
     private List<Exchange> exchanges = new ArrayList<>();
 
+    /**
+     * Check update state of every Exchange mentioned in target.
+     * @param from Currency to convert from. Exchange ID.
+     * @param target Currencies to convert to. Exchange ID.
+     * @return List of stored exchanges that match the from and target.
+     */
     public List<Exchange> checkExchangeUpdateState(String from, String target) {
         updateExchangeStates(from, target);
 
@@ -33,31 +39,52 @@ public class ExchangeDB {
         return storedExchanges;
     }
 
+    /**
+     * Updates the state of the specified Exchanges according to their request time.
+     * If an Exchange is more than a minute old, it becomes Outdated.
+     * @param from Currency to convert from. Exchange ID.
+     * @param target Currencies to convert to. Exchange ID.
+     */
     private void updateExchangeStates(String from, String target) {
         for (String t : target.replaceAll(" ", "target").split(",")) {
             Exchange exchange = findExchangeRate(from, t);
+            if (exchange == null) {
+                continue;
+            }
             
             LocalTime now = LocalTime.now();
-            int hour, min;
+            int hour, min, sec;
 
             hour = now.getHour();
             min = now.getMinute();
+            sec = now.getSecond();
 
-            if ((int) exchange.getRequestTime().get("hour") > hour || (int) exchange.getRequestTime().get("hour") < hour) {
+            if ((int) exchange.getRequestTime().get("Hour") > hour || (int) exchange.getRequestTime().get("Hour") < hour) {
                 exchange.setOutdated(true);
             }
             else {
-                int dif = min - (int) exchange.getRequestTime().get("min");
-                if (dif >= 1) {
+                int difMin = min - (int) exchange.getRequestTime().get("Minute");
+                if (difMin > 1) {
                     exchange.setOutdated(true);
                 }
-                else {
-                    exchange.setOutdated(false);
+                else if (difMin == 1) {
+                    if ((int) exchange.getRequestTime().get("Minute") > sec) {
+                        exchange.setOutdated(true);
+                    }
+                    else {
+                        exchange.setOutdated(false);
+                    }
                 }
             }
         }
     }
 
+    /**
+     * Find a specific instance of Exchange using its identifiers.
+     * @param from Currency to convert from. Exchange ID.
+     * @param to Currency to convert to. Exchange ID.
+     * @return Return Exchange object if found. If not found, return null.
+     */
     public Exchange findExchangeRate(String from, String to) {
         for (Exchange e : exchanges) {
             if (e.getFrom().equals(from) && e.getTo().equals(to)) {
@@ -68,6 +95,15 @@ public class ExchangeDB {
         return null;
     }
 
+    /**
+     * 
+     * @param from
+     * @param to
+     * @param rate
+     * @param time
+     * @param date
+     * @param source
+     */
     public void saveConversionData(String from, String to, double rate, Map<String, Integer> time, String date, APIType source) {
         Exchange e = findExchangeRate(from, to);
 
@@ -79,13 +115,17 @@ public class ExchangeDB {
         }       
     }
 
+    /**
+     * 
+     * @param finalMap
+     */
     @SuppressWarnings("unchecked")
-    public void saveData(Map<Keys, Object> valueMap) { // TODO - TEST
-        Map<String, Double> ratesMap = (Map<String, Double>) valueMap.get(Keys.RATES);
-        String date = (String) valueMap.get(Keys.RESULT_DATE);
-        APIType source = (APIType) valueMap.get(Keys.API); // error here
-        String from = (String) valueMap.get(Keys.CURRENCY_FROM);
-        Map<String, Integer> time = (Map<String, Integer>) valueMap.get(Keys.REQUEST_TIME);
+    public void saveData(Map<Keys, Object> finalMap) {
+        Map<String, Double> ratesMap = (Map<String, Double>) finalMap.get(Keys.RATES);
+        String date = (String) finalMap.get(Keys.RESULT_DATE);
+        APIType source = (APIType) finalMap.get(Keys.API); // error here
+        String from = (String) finalMap.get(Keys.CURRENCY_FROM);
+        Map<String, Integer> time = (Map<String, Integer>) finalMap.get(Keys.REQUEST_TIME);
 
         Iterator<String> keyIt = ratesMap.keySet().iterator();
         Iterator<Double> valueIt = ratesMap.values().iterator();
@@ -110,6 +150,15 @@ public class ExchangeDB {
         }
     }
 
+    /**
+     * 
+     * @param from
+     * @param to
+     * @param rate
+     * @param date
+     * @param time
+     * @param source
+     */
     public void addExchangeRate(String from, String to, double rate, String date, Map<String, Integer> time, APIType source) {
         Exchange e = findExchangeRate(from, to);
         if (e != null) {
@@ -120,6 +169,11 @@ public class ExchangeDB {
         }
     }
 
+    /**
+     * 
+     * @param obj
+     * @param source
+     */
     public void addBulkExchangeRate(JSONObject obj, APIType source) {
         String from = (String) obj.get("Currency");
         JSONObject rates = (JSONObject) obj.get("Rates");
@@ -145,6 +199,12 @@ public class ExchangeDB {
         }
     }
 
+    /**
+     * 
+     * @param from
+     * @param to
+     * @return
+     */
     public JSONObject getExchangeRate(String from, String to) {
         Exchange e = findExchangeRate(from, to);
         return e.getExchange();

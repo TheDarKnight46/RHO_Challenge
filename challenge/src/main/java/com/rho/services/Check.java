@@ -9,7 +9,7 @@ public abstract class Check {
     
     public static boolean isCurrencyCode(String currency) {
         try {
-            int i = Integer.parseInt(currency);
+            Integer.parseInt(currency);
             return false;
         } 
         catch (NumberFormatException e) {
@@ -29,7 +29,7 @@ public abstract class Check {
 
     public static boolean isAmountNumber(String amount) {
         try {
-            double num = Double.parseDouble(amount);
+            Double.parseDouble(amount);
             return true;
         } catch (Exception e) {
             return false;
@@ -42,6 +42,26 @@ public abstract class Check {
         map.put(Keys.SUCCESS, false);
         map.put(Keys.CALL_EXECUTED, false);
         map.put(Keys.ERROR_MESSAGE, "Wrong amount number format");
+
+        return map;
+    }
+
+    public static Map<Keys, Object> fatalErrorMessage() {
+        Map<Keys, Object> map = new HashMap<>();
+
+        map.put(Keys.SUCCESS, false);
+        map.put(Keys.CALL_EXECUTED, false);
+        map.put(Keys.ERROR_MESSAGE, "Fatal error occurred");
+
+        return map;
+    }
+
+    public static Map<Keys, Object> unknownAPIRequested() {
+        Map<Keys, Object> map = new HashMap<>();
+
+        map.put(Keys.SUCCESS, false);
+        map.put(Keys.CALL_EXECUTED, false);
+        map.put(Keys.ERROR_MESSAGE, "Unknown API Requested");
 
         return map;
     }

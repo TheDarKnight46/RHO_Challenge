@@ -181,21 +181,38 @@ This is the structure of the returned JSON Objects:
 }
 ```
 
-## SwaggerHub Documentation
+## Swagger Documentation
 
+With the spring application running, the documentation can be accessed at:
 
+```http://localhost:8080/swagger-ui/index.html#/```
 
 ## Extra Features
 
 These were the extra features developed for the challenge.
 
-Each method has its own *javadoc* to allow easy reference of its functionality
+Each method has its own *javadoc* to allow easy reference of its functionality.
 
 ### Reduce API Calls Mechanism
 
-To 
+To reduce the amount of calls made to the API, a mechanism was implemented.
 
-Not implemented in GET all rates 
+Before explaining how it works its important to establish how each ```Exchange``` object is composed of. Its main variables are:
+
+```java
+    private String from, to; // Identifiers
+    private double rate; // Exchange Rate stored
+    private Map<String, Integer> time; // Time instance in hh:mm:ss of when it was fetched
+    private boolean outdated = false; // Becomes outdated 1 min. after fetching 
+```
+
+When a new call to the API is about to be performed, the current time is checked against the ```Exchange``` object time.
+
+- If it has been less than a minute, the DB is referenced and the values returned.
+- If it is outdated, a new API call is made.
+
+> [!NOTE]
+> This is mechanism is not implemented in the *GetAllRates* methods.
 
 ### Unit Testing
 
@@ -220,6 +237,7 @@ These are the methods written:
 - ```testReduceCallMechanismTrue()```
 - ```testReduceCallMechanismAfterSave()```
 - ```testReduceCallMechanismFalse()```
+- ```testReduceCallMechanismWait()```
 
 **The code succeeded in all unit tests performed.**
 

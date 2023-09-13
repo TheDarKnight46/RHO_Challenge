@@ -24,6 +24,13 @@ public class Exchange {
         this.source = source;
     }
 
+    /**
+     * Edit already existing Exchange with new values.
+     * @param rate New exchange rate.
+     * @param date New date.
+     * @param time New request time.
+     * @param source New API source.
+     */
     public void editRate(double rate, String date, Map<String, Integer> time, APIType source) {
         this.rate = rate;
         this.date = date;
@@ -64,6 +71,10 @@ public class Exchange {
         return rate;
     }
 
+    /**
+     * Format the main information of the Exchange object and return it.
+     * @return JSONObject with the main information of the Exchange object.
+     */
     public JSONObject getExchange() {
         Map<String, Object> values = new HashMap<>();
 
