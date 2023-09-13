@@ -37,6 +37,7 @@ public class AyrExchangeRateAPI implements APIInterface {
 
         Map<String, APIType> apiMap = new HashMap<>();
 		Map<String, Double> ratesMap = new HashMap<>();
+        boolean save = false;
         RequestAnswer answer;
 
 		// Reduce Calls Mechanism
@@ -68,8 +69,7 @@ public class AyrExchangeRateAPI implements APIInterface {
 				answer.addApi(APIType.AYR, s);
 			}
 
-            // Store the new fetched data.
-            db.saveData(answer);
+            save = true;
         }
         else {
             // Add old data to final map
@@ -83,6 +83,11 @@ public class AyrExchangeRateAPI implements APIInterface {
         answer.setCurrencyTo(symbols);
         answer.setRequestTime(Connections.getCurrentTime());
         
+        if (save) {
+            // Store the new fetched data.
+            db.saveData(answer);
+        }
+
         return answer;
     }
 

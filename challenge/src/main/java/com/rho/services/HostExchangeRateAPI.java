@@ -55,8 +55,8 @@ public class HostExchangeRateAPI implements APIInterface {
 		}
 		
 		RequestAnswer answer;
+		boolean save = false;
 		String[] symbols = targets.replaceAll(" ", "").split(",");
-
 		// Check if API call is still required
 		if (oldExchanges.size() < symbols.length) {
 			// Request new data from API
@@ -69,12 +69,11 @@ public class HostExchangeRateAPI implements APIInterface {
 				answer.addApi(APIType.HOST, s);
 			}
 
-			// Store the new fetched data.
-			db.saveData(answer);
+			save = true;
 		}
 		else {
 			// Add old data to answer
-			answer = new RequestAnswer(true, true);
+			answer = new RequestAnswer(true, false);
 			answer.setRates(ratesMap);
 			answer.setApi(apiMap);
 		}
@@ -83,6 +82,11 @@ public class HostExchangeRateAPI implements APIInterface {
 		answer.setCurrencyFrom(currency);
 		answer.setCurrencyTo(symbols);
 		answer.setRequestTime(Connections.getCurrentTime());
+
+		if (save) {
+			// Store the new fetched data.
+			db.saveData(answer);
+		}
 
 		return answer;
 	}

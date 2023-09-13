@@ -278,7 +278,7 @@ public class ExchangeRateSpringTests {
         RequestAnswer obj2 = (RequestAnswer) api.getExchangeRates(db, "EUR", "USD,GBP,CHF");
 
         assertTrue(obj2.isSuccess());
-        assertFalse(obj1.isCallExecuted());
+        assertFalse(obj2.isCallExecuted());
     }
 
     @Test
