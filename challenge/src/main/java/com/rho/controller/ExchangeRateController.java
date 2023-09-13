@@ -1,25 +1,19 @@
 package com.rho.controller;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.json.simple.JSONObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.rho.model.ExchangeDB;
 import com.rho.model.enums.APIType;
-import com.rho.model.enums.Keys;
 import com.rho.model.schemas.BadRequestAnswer;
+import com.rho.model.schemas.CustomSchema;
 import com.rho.model.schemas.RequestAnswer;
 import com.rho.services.AyrExchangeRateAPI;
 import com.rho.services.Check;
+import com.rho.services.Connections;
 import com.rho.services.HostExchangeRateAPI;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
@@ -54,12 +48,16 @@ public class ExchangeRateController {
         @ApiResponse(responseCode = "410", description = "Unexpected Error", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestAnswer.class)) }),
     })
     @GetMapping("/rates/all/{currency}") 
-    public JSONObject getAllExchangeRates(@Parameter(description = "The currency to get exchange rates from") @PathVariable String currency) {
+    public ResponseEntity<CustomSchema> getAllExchangeRates(@Parameter(description = "The currency to get exchange rates from") @PathVariable String currency) {
         try {
-            return hostAPI.getAllExchangeRates(db, currency);
+            CustomSchema obj = hostAPI.getAllExchangeRates(db, currency);
+            if (obj.isSuccess()) {
+                return new ResponseEntity<CustomSchema>(obj, HttpStatus.OK);
+            }
+            return new ResponseEntity<CustomSchema>(obj, HttpStatus.EXPECTATION_FAILED);
         }
         catch (Exception e) {
-            return new JSONObject(Check.fatalErrorMessage());
+            return new ResponseEntity<CustomSchema>(Check.fatalErrorMessage(), HttpStatus.GONE);
         }
     }
 
@@ -70,20 +68,28 @@ public class ExchangeRateController {
         @ApiResponse(responseCode = "410", description = "Unexpected Error", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestAnswer.class)) }),
     })
     @GetMapping("/rates/all/{api}/{currency}")
-    public JSONObject getAllExchangeRates(@Parameter(description = "The currency to get exchange rates from") @PathVariable String currency, 
+    public ResponseEntity<CustomSchema> getAllExchangeRates(@Parameter(description = "The currency to get exchange rates from") @PathVariable String currency, 
                                         @Parameter(description = "Specific API to use (host or ayr)") @PathVariable String api) {
         try {
+            CustomSchema obj;
             switch (getEnumApiType(api)) {
                 case HOST:
-                    return hostAPI.getAllExchangeRates(db, currency);
+                    obj = hostAPI.getAllExchangeRates(db, currency);
+                    break;
                 case AYR:
-                    return ayrAPI.getAllExchangeRates(db, currency);
+                    obj = ayrAPI.getAllExchangeRates(db, currency);
+                    break;
                 default:
-                    return new JSONObject(Check.unknownAPIRequested());
+                    return new ResponseEntity<CustomSchema>(Check.unknownAPIRequested(), HttpStatus.EXPECTATION_FAILED);
             } 
+
+            if (obj.isSuccess()) {
+                return new ResponseEntity<CustomSchema>(obj, HttpStatus.OK);
+            }
+            return new ResponseEntity<CustomSchema>(obj, HttpStatus.EXPECTATION_FAILED);
         }
         catch (Exception e) {
-            return new JSONObject(Check.fatalErrorMessage());
+            return new ResponseEntity<CustomSchema>(Check.fatalErrorMessage(), HttpStatus.GONE);
         }  
     }
 
@@ -96,18 +102,17 @@ public class ExchangeRateController {
         @ApiResponse(responseCode = "410", description = "Unexpected Error", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestAnswer.class)) }),
     })
     @GetMapping("/rates/{currency}&{targets}")
-    public ResponseEntity<JSONObject> getExchangeRates(@Parameter(description = "The currency to get exchange rates from") @PathVariable String currency, 
+    public ResponseEntity<CustomSchema> getExchangeRates(@Parameter(description = "The currency to get exchange rates from") @PathVariable String currency, 
                                                     @Parameter(description = "The currencies to get exchange rates to") @PathVariable String targets) {
         try {
-            JSONObject obj = hostAPI.getExchangeRates(db, currency, targets);
-
-            if ((boolean) obj.get(Keys.SUCCESS)) {
-                return new ResponseEntity<JSONObject>(obj, HttpStatus.OK);
+            CustomSchema obj = hostAPI.getExchangeRates(db, currency, targets);
+            if (obj.isSuccess()) {
+                return new ResponseEntity<CustomSchema>(obj, HttpStatus.OK);
             }
-            return new ResponseEntity<JSONObject>(obj, HttpStatus.EXPECTATION_FAILED); 
+            return new ResponseEntity<CustomSchema>(obj, HttpStatus.EXPECTATION_FAILED); 
         }
         catch (Exception e) {
-            return new ResponseEntity<JSONObject>(new JSONObject(Check.fatalErrorMessage()), HttpStatus.GONE);
+            return new ResponseEntity<CustomSchema>(Check.fatalErrorMessage(), HttpStatus.GONE);
         }
     }
 
@@ -118,23 +123,31 @@ public class ExchangeRateController {
         @ApiResponse(responseCode = "410", description = "Unexpected Error", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestAnswer.class)) }),
     })
     @GetMapping("/rates/{api}/{currency}&{targets}")
-    public JSONObject getExchangeRates(@Parameter(description = "The currency to get exchange rates from") @PathVariable String currency, 
+    public ResponseEntity<CustomSchema> getExchangeRates(@Parameter(description = "The currency to get exchange rates from") @PathVariable String currency, 
                                     @Parameter(description = "The currencies to get exchange rates to") @PathVariable String targets, 
                                     @Parameter(description = "Specific API to use (host or ayr)") @PathVariable String api) {
         try {
             String symbols = targets.replaceAll(" ", "");
+            CustomSchema obj;
         
             switch (getEnumApiType(api)) {
                 case HOST:
-                    return hostAPI.getExchangeRates(db, currency, symbols);
+                    obj = hostAPI.getExchangeRates(db, currency, symbols);
+                    break;
                 case AYR:
-                    return ayrAPI.getExchangeRates(db, currency, symbols);
+                    obj = ayrAPI.getExchangeRates(db, currency, symbols);
+                    break;
                 default:
-                    return new JSONObject(Check.unknownAPIRequested());
+                    return new ResponseEntity<CustomSchema>(Check.unknownAPIRequested(), HttpStatus.EXPECTATION_FAILED);
             }
+
+            if (obj.isSuccess()) {
+                return new ResponseEntity<CustomSchema>(obj, HttpStatus.OK);
+            }
+            return new ResponseEntity<CustomSchema>(obj, HttpStatus.EXPECTATION_FAILED);
         }
         catch (Exception e) {
-            return new JSONObject(Check.fatalErrorMessage());
+            return new ResponseEntity<CustomSchema>(Check.fatalErrorMessage(), HttpStatus.GONE);
         }
     }
 
@@ -147,18 +160,22 @@ public class ExchangeRateController {
         @ApiResponse(responseCode = "410", description = "Unexpected Error", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestAnswer.class)) }),
     })
     @GetMapping("/convert/{from}&{to}&{amount}")
-    public JSONObject convertCurrency(@Parameter(description = "The currency to convert from") @PathVariable String from,
+    public ResponseEntity<CustomSchema> convertCurrency(@Parameter(description = "The currency to convert from") @PathVariable String from,
                                      @Parameter(description = "The currency to convert to") @PathVariable String to, 
                                      @Parameter(description = "The amount of currency to convert") @PathVariable String amount) {
         try {
             if (!Check.isAmountNumber(amount)) {
-                return new JSONObject(Check.formatWrongAmountFormatAnswer());
+                return new ResponseEntity<CustomSchema>(Check.formatWrongAmountFormatAnswer(), HttpStatus.EXPECTATION_FAILED);
             }
-
-            return hostAPI.convertCurrency(db, from, to, Double.parseDouble(amount));
+            
+            CustomSchema obj = hostAPI.convertCurrency(db, from, to, Double.parseDouble(amount));
+            if (obj.isSuccess()) {
+                return new ResponseEntity<CustomSchema>(obj, HttpStatus.OK);
+            }
+            return new ResponseEntity<CustomSchema>(obj, HttpStatus.EXPECTATION_FAILED);
         }
         catch (Exception e) {
-            return new JSONObject(Check.fatalErrorMessage());
+            return new ResponseEntity<CustomSchema>(Check.fatalErrorMessage(), HttpStatus.GONE);
         }
     }
 
@@ -169,29 +186,35 @@ public class ExchangeRateController {
         @ApiResponse(responseCode = "410", description = "Unexpected Error", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestAnswer.class)) }),
     })
     @GetMapping("/convert/{api}/{from}&{to}&{amount}")
-    public JSONObject convertCurrency(@Parameter(description = "The currency to convert from") @PathVariable String from, 
+    public ResponseEntity<CustomSchema> convertCurrency(@Parameter(description = "The currency to convert from") @PathVariable String from, 
                                     @Parameter(description = "The currency to convert to") @PathVariable String to, 
                                     @Parameter(description = "The amount of currency to convert") @PathVariable String amount, 
                                     @Parameter(description = "Specific API to use (host or ayr)") @PathVariable String api) {
         try {
             if (!Check.isAmountNumber(amount)) {
-                return new JSONObject(Check.formatWrongAmountFormatAnswer());
+                return new ResponseEntity<CustomSchema>(Check.formatWrongAmountFormatAnswer(), HttpStatus.EXPECTATION_FAILED);
             }
 
+            CustomSchema obj;
             switch (getEnumApiType(api)) {
                 case HOST:
-                    return hostAPI.convertCurrency(db, from, to, Double.parseDouble(amount));
+                    obj = hostAPI.convertCurrency(db, from, to, Double.parseDouble(amount));
+                    break;
                 case AYR:
-                    return ayrAPI.convertCurrency(db, from, to, Double.parseDouble(amount));
+                    obj = ayrAPI.convertCurrency(db, from, to, Double.parseDouble(amount));
+                    break;
                 default:
-                    return new JSONObject(Check.unknownAPIRequested());
+                    return new ResponseEntity<CustomSchema>(Check.unknownAPIRequested(), HttpStatus.EXPECTATION_FAILED);
             }
+
+            if (obj.isSuccess()) {
+                return new ResponseEntity<CustomSchema>(obj, HttpStatus.OK);
+            }
+            return new ResponseEntity<CustomSchema>(obj, HttpStatus.EXPECTATION_FAILED);
         }
         catch (Exception e) {
-            return new JSONObject(Check.fatalErrorMessage());
+            return new ResponseEntity<CustomSchema>(Check.fatalErrorMessage(), HttpStatus.GONE);
         }
-        
-        
     }
 
     // ========= CONVERT CURRENCY A TO MULTIPLE =========
@@ -202,38 +225,37 @@ public class ExchangeRateController {
         @ApiResponse(responseCode = "417", description = "Parameter format error", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestAnswer.class)) }),
         @ApiResponse(responseCode = "410", description = "Unexpected Error", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestAnswer.class)) }),
     })
-    @SuppressWarnings("unchecked")
     @GetMapping("/convert/multi/{from}&{targets}&{amount}")
-    public JSONObject convertMultiCurrency(@Parameter(description = "The currency to convert from") @PathVariable String from, 
+    public ResponseEntity<CustomSchema> convertMultiCurrency(@Parameter(description = "The currency to convert from") @PathVariable String from, 
                                         @Parameter(description = "The currencies to convert to") @PathVariable String targets,
                                         @Parameter(description = "The amount of currency to convert") @PathVariable String amount) {
         try {
             if (!Check.isAmountNumber(amount)) {
-                return new JSONObject(Check.formatWrongAmountFormatAnswer());
+                return new ResponseEntity<CustomSchema>(Check.formatWrongAmountFormatAnswer(), HttpStatus.EXPECTATION_FAILED);
             }
 
-            JSONObject obj = null;
-            ArrayList<String> symbols = new ArrayList<>(Arrays.asList(targets.replaceAll(" ", "").split(",")));
-            Map<String, Double> currencyMap = new HashMap<>();
-            Map<String, Double> ratesMap = new HashMap<>();
+            String[] symbols = targets.replaceAll(" ", "").split(",");
+            RequestAnswer answer = new RequestAnswer(true, false);
+            answer.setCurrencyFrom(from);
+            answer.setAmount(Double.parseDouble(amount));
+            answer.addApi(APIType.HOST, "All");
+            answer.setRequestTime(Connections.getCurrentTime());
+            answer.setCurrencyTo(symbols);
 
             for (String str : symbols) {
-                obj = hostAPI.convertCurrency(db, from, str, Double.parseDouble(amount));
-                currencyMap.put(str, (Double) obj.get(Keys.RESULT));
-                ratesMap.put(str, (Double) obj.get(Keys.RATES));
-            }
-            
-            if (obj != null) {
-                obj.replace(Keys.RESULT, currencyMap);
-                obj.replace(Keys.RATES, ratesMap);
-                obj.replace(Keys.CURRENCY_TO, targets);
+                RequestAnswer obj = (RequestAnswer) hostAPI.convertCurrency(db, from, str, Double.parseDouble(amount));
+                if (!obj.isSuccess()) {
+                    return new ResponseEntity<CustomSchema>(obj, HttpStatus.EXPECTATION_FAILED);
+                }
 
-                return obj;
+                answer.joinRates(obj.getRates());
+                answer.joinResults(obj.getResults());
             }
-            return null;
+
+            return new ResponseEntity<CustomSchema>(answer, HttpStatus.OK);
         }
         catch (Exception e) {
-            return new JSONObject(Check.fatalErrorMessage());
+            return new ResponseEntity<CustomSchema>(Check.fatalErrorMessage(), HttpStatus.GONE);
         }
     }
 
@@ -243,51 +265,49 @@ public class ExchangeRateController {
         @ApiResponse(responseCode = "417", description = "Parameter format error", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestAnswer.class)) }),
         @ApiResponse(responseCode = "410", description = "Unexpected Error", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestAnswer.class)) }),
     })
-    @SuppressWarnings("unchecked")
     @GetMapping("/convert/multi/{api}/{from}&{targets}&{amount}")
-    public JSONObject convertMultiCurrency(@Parameter(description = "The currency to convert from") @PathVariable String from, 
+    public ResponseEntity<CustomSchema> convertMultiCurrency(@Parameter(description = "The currency to convert from") @PathVariable String from, 
                                         @Parameter(description = "The currencies to convert to") @PathVariable String targets, 
                                         @Parameter(description = "The amount of currency to convert") @PathVariable String amount, 
                                         @Parameter(description = "Specific API to use (host or ayr)") @PathVariable String api) {
         try {
             if (!Check.isAmountNumber(amount)) {
-                return new JSONObject(Check.formatWrongAmountFormatAnswer());
+                return new ResponseEntity<CustomSchema>(Check.formatWrongAmountFormatAnswer(), HttpStatus.EXPECTATION_FAILED);
             }
 
-            JSONObject obj = null;
-            ArrayList<String> symbols = new ArrayList<>(Arrays.asList(targets.replaceAll(" ", "").split(",")));
-            Map<String, Double> currencyMap = new HashMap<>();
-            Map<String, Double> ratesMap = new HashMap<>();
-            
+            String[] symbols = targets.replaceAll(" ", "").split(",");
+            RequestAnswer answer = new RequestAnswer(true, false);
+            answer.setCurrencyFrom(from);
+            answer.setAmount(Double.parseDouble(amount));
+            answer.addApi(APIType.HOST, "All");
+            answer.setRequestTime(Connections.getCurrentTime());
+            answer.setCurrencyTo(symbols);
+
             for (String str : symbols) {
+                RequestAnswer obj;
                 switch (getEnumApiType(api)) {
                     case HOST:
-                        obj = hostAPI.convertCurrency(db, from, str, Double.parseDouble(amount));
+                        obj = (RequestAnswer) hostAPI.convertCurrency(db, from, str, Double.parseDouble(amount));
                         break;
                     case AYR:
-                        obj = ayrAPI.convertCurrency(db, from, str, Double.parseDouble(amount));
+                        obj = (RequestAnswer) ayrAPI.convertCurrency(db, from, str, Double.parseDouble(amount));
                         break;
                     default:
-                        return new JSONObject(Check.unknownAPIRequested());
+                        return new ResponseEntity<CustomSchema>(Check.unknownAPIRequested(), HttpStatus.EXPECTATION_FAILED);
                 }
                 
-                if (obj != null) {
-                    currencyMap.put(str, (Double) obj.get(Keys.RESULT));
-                    ratesMap.put(str, (Double) obj.get(Keys.RATES));
+                if (!obj.isSuccess()) {
+                    return new ResponseEntity<CustomSchema>(obj, HttpStatus.EXPECTATION_FAILED);
                 }
-            }
-            
-            if (obj != null) {
-                obj.replace(Keys.RESULT, currencyMap);
-                obj.replace(Keys.RATES, ratesMap);
-                obj.replace(Keys.CURRENCY_TO, targets);
 
-                return obj;
+                answer.joinRates(obj.getRates());
+                answer.joinResults(obj.getResults());
             }
-            return null;
+
+            return new ResponseEntity<CustomSchema>(answer, HttpStatus.OK);
         }
         catch (Exception e) {
-            return new JSONObject(Check.fatalErrorMessage());
+            return new ResponseEntity<CustomSchema>(Check.fatalErrorMessage(), HttpStatus.GONE);
         }
     }
 
@@ -303,9 +323,7 @@ public class ExchangeRateController {
             case "host":
                 return APIType.HOST;
             case "ayr":
-                return APIType.AYR;                
-            case "currency":
-                return APIType.CURRENCY;
+                return APIType.AYR;
             default:
                 return null;
         }

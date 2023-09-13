@@ -1,13 +1,10 @@
 package com.rho.model.schemas;
 
-public class BadRequestAnswer {
-    private boolean success = false;
-    private boolean callExecuted = false;
+public class BadRequestAnswer extends CustomSchema {
     private String errorMessage = "";
 
     public BadRequestAnswer(boolean success, boolean callExecuted, String error) {
-        this.success = success;
-        this.callExecuted = callExecuted;
+        super(success, callExecuted);
         this.errorMessage = error;
     }
 
@@ -16,10 +13,10 @@ public class BadRequestAnswer {
     }
 
     public boolean isCallExecuted() {
-        return callExecuted;
+        return super.isCallExecuted();
     }
 
     public boolean isSuccess() {
-        return success;
+        return super.isCallExecuted();
     }
 }

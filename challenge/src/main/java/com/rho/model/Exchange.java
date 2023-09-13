@@ -12,14 +12,12 @@ public class Exchange {
     private String from, to;
     private double rate;
     private Map<String, Integer> time;
-    private String date;
     private boolean outdated = false;
 
-    public Exchange(String from, String to, double rate, String date, Map<String, Integer> time, APIType source) {
+    public Exchange(String from, String to, double rate, Map<String, Integer> time, APIType source) {
         this.from = from;
         this.to = to;
         this.rate = rate;
-        this.date = date;
         this.time = time;
         this.source = source;
     }
@@ -31,9 +29,8 @@ public class Exchange {
      * @param time New request time.
      * @param source New API source.
      */
-    public void editRate(double rate, String date, Map<String, Integer> time, APIType source) {
+    public void editRate(double rate, Map<String, Integer> time, APIType source) {
         this.rate = rate;
-        this.date = date;
         this.time = time;
         this.source = source;
         this.outdated = false;
@@ -63,10 +60,6 @@ public class Exchange {
         return outdated;
     }
 
-    public String getDate() {
-        return date;
-    }
-
     public double getRate() {
         return rate;
     }
@@ -81,7 +74,6 @@ public class Exchange {
         values.put("From", from);
         values.put("To", to);
         values.put("Rate", rate);
-        values.put("Result Date", date);
         values.put("Request Time", time);
         values.put("Source", source);
 

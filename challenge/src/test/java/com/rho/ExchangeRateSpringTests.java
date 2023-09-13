@@ -8,13 +8,13 @@ import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.json.simple.JSONObject;
 import org.junit.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.rho.model.ExchangeDB;
 import com.rho.model.enums.APIType;
-import com.rho.model.enums.Keys;
+import com.rho.model.schemas.BadRequestAnswer;
+import com.rho.model.schemas.RequestAnswer;
 import com.rho.services.AyrExchangeRateAPI;
 import com.rho.services.Connections;
 import com.rho.services.HostExchangeRateAPI;
@@ -30,12 +30,12 @@ public class ExchangeRateSpringTests {
         HostExchangeRateAPI api = new HostExchangeRateAPI();
         String currency = "EUR";
 
-        JSONObject obj = api.getAllExchangeRates(db, currency);
+        RequestAnswer obj = (RequestAnswer) api.getAllExchangeRates(db, currency);
 
-        assertEquals((String) obj.get(Keys.CURRENCY_FROM), currency);
-        assertTrue((boolean) obj.get(Keys.CALL_EXECUTED));
-        assertTrue((boolean) obj.get(Keys.SUCCESS));
-        assertEquals((APIType) obj.get(Keys.API), APIType.HOST);
+        assertEquals(obj.getCurrencyFrom(), currency);
+        assertTrue(obj.isCallExecuted());
+        assertTrue(obj.isSuccess());
+        assertEquals(obj.getApi().values().iterator().next(), APIType.HOST);
     }
 
     @Test
@@ -44,12 +44,12 @@ public class ExchangeRateSpringTests {
         AyrExchangeRateAPI api = new AyrExchangeRateAPI();
         String currency = "USD";
 
-        JSONObject obj = api.getAllExchangeRates(db, currency);
+        RequestAnswer obj = (RequestAnswer) api.getAllExchangeRates(db, currency);
 
-        assertEquals((String) obj.get(Keys.CURRENCY_FROM), currency);
-        assertTrue((boolean) obj.get(Keys.CALL_EXECUTED));
-        assertTrue((boolean) obj.get(Keys.SUCCESS));
-        assertEquals((APIType) obj.get(Keys.API), APIType.AYR);
+        assertEquals(obj.getCurrencyFrom(), currency);
+        assertTrue(obj.isCallExecuted());
+        assertTrue(obj.isSuccess());
+        assertEquals(obj.getApi().values().iterator().next(), APIType.AYR);
     }
 
     @Test
@@ -58,29 +58,29 @@ public class ExchangeRateSpringTests {
         HostExchangeRateAPI api = new HostExchangeRateAPI();
         String currency = "US";
 
-        JSONObject obj = api.getAllExchangeRates(db, currency);
+        BadRequestAnswer obj = (BadRequestAnswer) api.getAllExchangeRates(db, currency);
 
-        assertFalse((boolean) obj.get(Keys.SUCCESS));
-        assertFalse((boolean) obj.get(Keys.CALL_EXECUTED));
+        assertFalse(obj.isSuccess());
+        assertFalse(obj.isCallExecuted());
     }
 
     // ========= GET SPECIFIC RATES =========
 
     @Test
-    @SuppressWarnings("unchecked")
     public void testSpecificRatesHost() {
         ExchangeDB db = new ExchangeDB();
         HostExchangeRateAPI api = new HostExchangeRateAPI();
         String currency = "EUR";
         String targets = "USD,GBP,CHF";
 
-        JSONObject obj = api.getExchangeRates(db, currency, targets);
+        RequestAnswer obj = (RequestAnswer) api.getExchangeRates(db, currency, targets);
 
-        assertTrue((boolean) obj.get(Keys.SUCCESS));
-        assertTrue((boolean) obj.get(Keys.CALL_EXECUTED));
-        assertEquals(currency, (String) obj.get(Keys.CURRENCY_FROM));
+        assertTrue(obj.isCallExecuted());
+        assertTrue(obj.isSuccess());
+        assertEquals(currency, obj.getCurrencyFrom());
+        assertEquals(obj.getApi().values().iterator().next(), APIType.HOST);
 
-        Map<String, Double> rates = (Map<String, Double>) obj.get(Keys.RATES);
+        Map<String, Double> rates = obj.getRates();
 
         assertTrue(rates.containsKey("USD"));
         assertTrue(rates.containsKey("CHF"));
@@ -88,20 +88,20 @@ public class ExchangeRateSpringTests {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     public void testSpecificRatesAyr() {
         ExchangeDB db = new ExchangeDB();
-        HostExchangeRateAPI api = new HostExchangeRateAPI();
+        AyrExchangeRateAPI api = new AyrExchangeRateAPI();
         String currency = "CHF";
         String targets = "USD,GBP,CAD";
 
-        JSONObject obj = api.getExchangeRates(db, currency, targets);
+        RequestAnswer obj = (RequestAnswer) api.getExchangeRates(db, currency, targets);
 
-        assertTrue((boolean) obj.get(Keys.SUCCESS));
-        assertTrue((boolean) obj.get(Keys.CALL_EXECUTED));
-        assertEquals(currency, (String) obj.get(Keys.CURRENCY_FROM));
+        assertTrue(obj.isCallExecuted());
+        assertTrue(obj.isSuccess());
+        assertEquals(currency, obj.getCurrencyFrom());
+        assertEquals(obj.getApi().values().iterator().next(), APIType.AYR);
 
-        Map<String, Double> rates = (Map<String, Double>) obj.get(Keys.RATES);
+        Map<String, Double> rates = obj.getRates();
 
         assertTrue(rates.containsKey("USD"));
         assertTrue(rates.containsKey("CAD"));
@@ -115,10 +115,10 @@ public class ExchangeRateSpringTests {
         String currency = "EU";
         String targets = "USD,GBP,CAD";
 
-        JSONObject obj = api.getExchangeRates(db, currency, targets);
+        BadRequestAnswer obj = (BadRequestAnswer) api.getExchangeRates(db, currency, targets);
 
-        assertFalse((boolean) obj.get(Keys.SUCCESS));
-        assertFalse((boolean) obj.get(Keys.CALL_EXECUTED));
+        assertFalse(obj.isSuccess());
+        assertFalse(obj.isCallExecuted());
     }
 
     // ========= CONVERT CURRENCY A TO B =========
@@ -131,13 +131,13 @@ public class ExchangeRateSpringTests {
         String to = "JPY";
         double amount = 1523.0;
 
-        JSONObject obj = api.convertCurrency(db, from, to, amount);
+        RequestAnswer obj = (RequestAnswer) api.convertCurrency(db, from, to, amount);
 
-        assertTrue((boolean) obj.get(Keys.SUCCESS));
-        assertTrue((boolean) obj.get(Keys.CALL_EXECUTED));
-        assertEquals(from, (String) obj.get(Keys.CURRENCY_FROM));
-        assertEquals(to, (String) obj.get(Keys.CURRENCY_TO));
-        assertEquals(240011, (double) obj.get(Keys.RESULT), 1000);
+        assertTrue(obj.isCallExecuted());
+        assertTrue(obj.isSuccess());
+        assertEquals(from, obj.getCurrencyFrom());
+        assertEquals(to, obj.getCurrencyTo().get(0));
+        assertEquals(240011, obj.getResults().values().iterator().next(), 1000);
     }
 
     @Test
@@ -148,30 +148,27 @@ public class ExchangeRateSpringTests {
         String to = "USD";
         double amount = 589.0;
 
-        JSONObject obj = api.convertCurrency(db, from, to, amount);
+        RequestAnswer obj = (RequestAnswer) api.convertCurrency(db, from, to, amount);
 
-        assertTrue((boolean) obj.get(Keys.SUCCESS));
-        assertTrue((boolean) obj.get(Keys.CALL_EXECUTED));
-        assertEquals(from, (String) obj.get(Keys.CURRENCY_FROM));
-        assertEquals(to, (String) obj.get(Keys.CURRENCY_TO));
-        assertEquals(632.5, (double) obj.get(Keys.RESULT), 100);
+        assertTrue(obj.isCallExecuted());
+        assertTrue(obj.isSuccess());
+        assertEquals(from, obj.getCurrencyFrom());
+        assertEquals(to, obj.getCurrencyTo().get(0));
+        assertEquals(632.5, obj.getResults().values().iterator().next(), 100);
     }
 
     @Test
     public void testConvertMalformedParams() {
         ExchangeDB db = new ExchangeDB();
         HostExchangeRateAPI api = new HostExchangeRateAPI();
-        String from = "EUR";
+        String from = "ER";
         String to = "JPY";
         double amount = 1523.0;
 
-        JSONObject obj = api.convertCurrency(db, from, to, amount);
+        BadRequestAnswer obj = (BadRequestAnswer) api.convertCurrency(db, from, to, amount);
 
-        assertTrue((boolean) obj.get(Keys.SUCCESS));
-        assertTrue((boolean) obj.get(Keys.CALL_EXECUTED));
-        assertEquals(from, (String) obj.get(Keys.CURRENCY_FROM));
-        assertEquals(to, (String) obj.get(Keys.CURRENCY_TO));
-        assertEquals(240011, (double) obj.get(Keys.RESULT), 1000);
+        assertFalse(obj.isSuccess());
+        assertFalse(obj.isCallExecuted());
     }
 
     // ========= CONVERT CURRENCY A TO MULTIPLE =========
@@ -184,25 +181,24 @@ public class ExchangeRateSpringTests {
         String to = "USD,GBP,JPY";
         double amount = 756.0;
         
-        JSONObject obj = null;
-        Map<String, Double> currencyMap = new HashMap<>();
-        Map<String, Double> ratesMap = new HashMap<>();
+        RequestAnswer answer = new RequestAnswer(true, true);
 
         for (String symbol : to.split(",")) {
-            obj = api.convertCurrency(db, from, symbol, amount);
-
-            if (obj != null) {
-                currencyMap.put(symbol, (Double) obj.get(Keys.RESULT));
-                ratesMap.put(symbol, (Double) obj.get(Keys.RATES));
+            RequestAnswer obj = (RequestAnswer) api.convertCurrency(db, from, symbol, amount);
+            if (obj.isSuccess() != true) {
+                answer.setSuccess(false);
             }
+
+            answer.addCurrencyTo(symbol);
+            answer.joinRates(obj.getRates());
+            answer.joinResults(obj.getResults());
         }
 
-        assertTrue(obj != null);
-        assertTrue((boolean) obj.get(Keys.SUCCESS));
-        assertTrue((boolean) obj.get(Keys.CALL_EXECUTED));
-        assertTrue((boolean) currencyMap.containsKey("USD"));
-        assertTrue((boolean) currencyMap.containsKey("GBP"));
-        assertTrue((boolean) currencyMap.containsKey("JPY"));
+        assertTrue(answer.isSuccess());
+        assertTrue(answer.isCallExecuted());
+        assertTrue(answer.getRates().containsKey("USD"));
+        assertTrue(answer.getRates().containsKey("GBP"));
+        assertTrue(answer.getRates().containsKey("JPY"));
     }   
     
     @Test
@@ -213,25 +209,24 @@ public class ExchangeRateSpringTests {
         String to = "USD,GBP,JPY";
         int amount = 756;
         
-        JSONObject obj = null;
-        Map<String, Double> currencyMap = new HashMap<>();
-        Map<String, Double> ratesMap = new HashMap<>();
+        RequestAnswer answer = new RequestAnswer(true, true);
 
         for (String symbol : to.split(",")) {
-            obj = api.convertCurrency(db, from, symbol, amount);
-
-            if (obj != null) {
-                currencyMap.put(symbol, (Double) obj.get(Keys.RESULT));
-                ratesMap.put(symbol, (Double) obj.get(Keys.RATES));
+            RequestAnswer obj = (RequestAnswer) api.convertCurrency(db, from, symbol, amount);
+            if (obj.isSuccess() != true) {
+                answer.setSuccess(false);
             }
+
+            answer.addCurrencyTo(symbol);
+            answer.joinRates(obj.getRates());
+            answer.joinResults(obj.getResults());
         }
 
-        assertTrue(obj != null);
-        assertTrue((boolean) obj.get(Keys.SUCCESS));
-        assertTrue((boolean) obj.get(Keys.CALL_EXECUTED));
-        assertTrue((boolean) currencyMap.containsKey("USD"));
-        assertTrue((boolean) currencyMap.containsKey("GBP"));
-        assertTrue((boolean) currencyMap.containsKey("JPY"));
+        assertTrue(answer.isSuccess());
+        assertTrue(answer.isCallExecuted());
+        assertTrue(answer.getRates().containsKey("USD"));
+        assertTrue(answer.getRates().containsKey("GBP"));
+        assertTrue(answer.getRates().containsKey("JPY"));
     }
 
     @Test
@@ -242,11 +237,10 @@ public class ExchangeRateSpringTests {
         String to = "USD,GBP,JPY";
         int amount = 756;
         
-        JSONObject obj = api.convertCurrency(db, from, to, amount);;
+        BadRequestAnswer obj = (BadRequestAnswer) api.convertCurrency(db, from, to, amount);;
 
-        assertTrue(obj != null);
-        assertFalse((boolean) obj.get(Keys.SUCCESS));
-        assertFalse((boolean) obj.get(Keys.CALL_EXECUTED));
+        assertFalse(obj.isSuccess());
+        assertFalse(obj.isCallExecuted());
     } 
 
     // ========= OTHER =========
@@ -261,10 +255,10 @@ public class ExchangeRateSpringTests {
         db.addExchangeRate("EUR", "GBP", 0.85876, "2023-09-12", time, APIType.HOST);
         db.addExchangeRate("EUR", "CHF", 0.957468, "2023-09-12", time, APIType.HOST);
 
-        JSONObject obj = api.getExchangeRates(db, "EUR", "USD,GBP,CHF");
+        RequestAnswer obj = (RequestAnswer) api.getExchangeRates(db, "EUR", "USD,GBP,CHF");
 
-        assertTrue((boolean) obj.get(Keys.SUCCESS));
-        assertFalse((boolean) obj.get(Keys.CALL_EXECUTED));
+        assertTrue(obj.isSuccess());
+        assertFalse(obj.isCallExecuted());
     }
 
     @Test
@@ -276,15 +270,15 @@ public class ExchangeRateSpringTests {
         db.addExchangeRate("EUR", "GBP", 0.85876, "2023-09-12", time, APIType.HOST);
         db.addExchangeRate("EUR", "CHF", 0.957468, "2023-09-12", time, APIType.HOST);
 
-        JSONObject obj1 = api.getExchangeRates(db, "EUR", "USD");
+        RequestAnswer obj1 = (RequestAnswer) api.getExchangeRates(db, "EUR", "USD");
 
-        assertTrue((boolean) obj1.get(Keys.SUCCESS));
-        assertTrue((boolean) obj1.get(Keys.CALL_EXECUTED));
+        assertTrue(obj1.isSuccess());
+        assertTrue(obj1.isCallExecuted());
 
-        JSONObject obj2 = api.getExchangeRates(db, "EUR", "USD,GBP,CHF");
+        RequestAnswer obj2 = (RequestAnswer) api.getExchangeRates(db, "EUR", "USD,GBP,CHF");
 
-        assertTrue((boolean) obj2.get(Keys.SUCCESS));
-        assertFalse((boolean) obj2.get(Keys.CALL_EXECUTED));
+        assertTrue(obj2.isSuccess());
+        assertFalse(obj1.isCallExecuted());
     }
 
     @Test
@@ -296,10 +290,10 @@ public class ExchangeRateSpringTests {
         db.addExchangeRate("EUR", "GBP", 1.074362, "2023-09-12", time, APIType.HOST);
         db.addExchangeRate("EUR", "CHF", 1.074362, "2023-09-12", time, APIType.HOST);
 
-        JSONObject obj = api.getExchangeRates(db, "EUR", "USD,GBP,CHF");
+        RequestAnswer obj = (RequestAnswer) api.getExchangeRates(db, "EUR", "USD,GBP,CHF");
 
-        assertTrue((boolean) obj.get(Keys.SUCCESS));
-        assertTrue((boolean) obj.get(Keys.CALL_EXECUTED));
+        assertTrue(obj.isSuccess());
+        assertTrue(obj.isCallExecuted());
     }
 
     @Test
@@ -317,10 +311,10 @@ public class ExchangeRateSpringTests {
         db.addExchangeRate("EUR", "GBP", 0.85876, "2023-09-12", time, APIType.HOST);
         db.addExchangeRate("EUR", "CHF", 0.957468, "2023-09-12", time, APIType.HOST);
 
-        JSONObject obj = api.getExchangeRates(db, "EUR", "USD,GBP,CHF");
+        RequestAnswer obj = (RequestAnswer) api.getExchangeRates(db, "EUR", "USD,GBP,CHF");
 
-        assertTrue((boolean) obj.get(Keys.SUCCESS));
-        assertTrue((boolean) obj.get(Keys.CALL_EXECUTED));
+        assertTrue(obj.isSuccess());
+        assertTrue(obj.isCallExecuted());
     }
 
 }

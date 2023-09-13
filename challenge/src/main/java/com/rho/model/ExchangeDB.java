@@ -10,7 +10,7 @@ import java.util.Set;
 import org.json.simple.JSONObject;
 
 import com.rho.model.enums.APIType;
-import com.rho.model.enums.Keys;
+import com.rho.model.schemas.RequestAnswer;
 
 public class ExchangeDB {
     private List<Exchange> exchanges = new ArrayList<>();
@@ -104,14 +104,14 @@ public class ExchangeDB {
      * @param date
      * @param source
      */
-    public void saveConversionData(String from, String to, double rate, Map<String, Integer> time, String date, APIType source) {
+    public void saveConversionData(String from, String to, double rate, Map<String, Integer> time, APIType source) {
         Exchange e = findExchangeRate(from, to);
 
         if (e != null) {
-            e.editRate(rate, date, time, source);
+            e.editRate(rate, time, source);
         }
         else {
-            exchanges.add(new Exchange(from, to, rate, date, time, source));
+            exchanges.add(new Exchange(from, to, rate, time, source));
         }       
     }
 
@@ -119,13 +119,11 @@ public class ExchangeDB {
      * 
      * @param finalMap
      */
-    @SuppressWarnings("unchecked")
-    public void saveData(Map<Keys, Object> finalMap) {
-        Map<String, Double> ratesMap = (Map<String, Double>) finalMap.get(Keys.RATES);
-        String date = (String) finalMap.get(Keys.RESULT_DATE);
-        APIType source = (APIType) finalMap.get(Keys.API); // error here
-        String from = (String) finalMap.get(Keys.CURRENCY_FROM);
-        Map<String, Integer> time = (Map<String, Integer>) finalMap.get(Keys.REQUEST_TIME);
+    public void saveData(RequestAnswer answer) {
+        Map<String, Double> ratesMap = answer.getRates();
+        APIType source = answer.getApi().values().iterator().next();
+        String from = answer.getCurrencyFrom();
+        Map<String, Integer> time = answer.getRequestTime();
 
         Iterator<String> keyIt = ratesMap.keySet().iterator();
         Iterator<Double> valueIt = ratesMap.values().iterator();
@@ -138,10 +136,10 @@ public class ExchangeDB {
                 Exchange e = findExchangeRate(from, to);
 
                 if (e != null) {
-                    e.editRate(rate, date, time, source);
+                    e.editRate(rate, time, source);
                 }
                 else {
-                    exchanges.add(new Exchange(from, to, rate, date, time, source));
+                    exchanges.add(new Exchange(from, to, rate, time, source));
                 }
             }
             else { // This was required due to API Ayr sending Long as the first rate in JSON instead of Double
@@ -162,10 +160,10 @@ public class ExchangeDB {
     public void addExchangeRate(String from, String to, double rate, String date, Map<String, Integer> time, APIType source) {
         Exchange e = findExchangeRate(from, to);
         if (e != null) {
-            e.editRate(rate, date, time, source);
+            e.editRate(rate, time, source);
         }
         else {
-            exchanges.add(new Exchange(from, to, rate, date, time, source));
+            exchanges.add(new Exchange(from, to, rate, time, source));
         }
     }
 

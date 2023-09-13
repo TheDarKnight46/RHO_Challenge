@@ -1,13 +1,12 @@
 package com.rho.services;
 
-import org.json.simple.JSONObject;
-
 import com.rho.model.ExchangeDB;
+import com.rho.model.schemas.CustomSchema;
 
 public interface APIInterface {
     
-    public JSONObject getExchangeRates(ExchangeDB db, String currency, String targets);
-    public JSONObject getAllExchangeRates(ExchangeDB db, String currency);
-    public JSONObject convertCurrency(ExchangeDB db, String from, String to, double amount);
+    public CustomSchema getExchangeRates(ExchangeDB db, String currency, String targets);
+    public CustomSchema getAllExchangeRates(ExchangeDB db, String currency);
+    public CustomSchema convertCurrency(ExchangeDB db, String from, String to, double amount);
     
 }
