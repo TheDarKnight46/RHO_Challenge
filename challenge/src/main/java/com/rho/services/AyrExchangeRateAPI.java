@@ -23,6 +23,13 @@ public class AyrExchangeRateAPI implements APIInterface {
 
     public AyrExchangeRateAPI() {}
 
+    /**
+	 * Get latest exchange rates for a specified currency and target. API: Ayr
+	 * @param db Database of class ExchangeDB storing all the exchange rates.
+	 * @param currency Currency from which to exchange.
+	 * @param target List of target currencies to get the exchange rate.
+	 * @return Result as a CustomSchema.
+	 */
     @Override
     public CustomSchema getExchangeRates(ExchangeDB db, String currency, String targets) {
         // Check for format of Strings
@@ -91,6 +98,12 @@ public class AyrExchangeRateAPI implements APIInterface {
         return answer;
     }
 
+    /**
+	 * Get all latest exchange rates for a specified currency. API: Ayr
+	 * @param db Database of class ExchangeDB storing all the exchange rates.
+	 * @param currency Currency from which to exchange.
+	 * @return Result as a CustomSchema.
+	 */
 	@SuppressWarnings("unchecked")
     @Override
     public CustomSchema getAllExchangeRates(ExchangeDB db, String currency) {
@@ -109,6 +122,7 @@ public class AyrExchangeRateAPI implements APIInterface {
         answer.setCurrencyFrom(currency);
         answer.setRates((Map<String, Double>) obj.get("conversion_rates"));
 		answer.addApi(APIType.AYR, "All");
+        answer.setRequestTime(Connections.getCurrentTime());
 
         // Store the new fetched data.
         db.saveData(answer);
@@ -116,6 +130,14 @@ public class AyrExchangeRateAPI implements APIInterface {
 		return answer;
     }
 
+    /**
+	 * Convert currency from one to another. API: Ayr
+	 * @param db Database of class ExchangeDB storing all the exchange rates.
+	 * @param from Currency from which to convert.
+	 * @param to Currency to convert to.
+	 * @param amount Amount of the first currency to convert to the second.
+	 * @return Result as a CustomSchema.
+	 */
     @Override
     public CustomSchema convertCurrency(ExchangeDB db, String from, String to, double amount) {
         // Check for format of Strings

@@ -36,7 +36,7 @@ public class ExchangeRateController {
 
     @GetMapping("/")
     public String index() {
-        return "Welcome";
+        return "http://localhost:8080/swagger-ui/index.html#/";
     }
 
     // ========= GET ALL RATES =========

@@ -158,26 +158,21 @@ localhost:8080/convert/multi/{api}/{from}&{targets}&{amount}
 
 It can be ```host``` or ```ayr```.
 
-## JSON Objects Structure
+## Request Answer Object Structure (Main Schema)
 
-This is the structure of the returned JSON Objects:
+This is the structure of the returned Request Answer Objects:
 
-```json
+```java
 {
-    "SUCCESS": ,
-    "REQUEST_TIME": {
-        "Hour": ,
-        "Minute": ,
-        "Second": ,
-    },
-    "CALL_EXECUTED": , // Because of the Reduce Call Mechanism
-    "CURRENCY_FROM": ,
-    "CURRENCY_TO": , 
-    "ORIGINAL_AMOUNT": , // Exclusive to conversion method returns
-    "RESULT": , // Exclusive to conversion method returns
-    "RATES": ,
-    "RESULT_DATE": ,
-    "API": 
+    private boolean success;
+    private boolean callExecuted;           // Because of the Reduce Call Mechanism
+    private String currencyFrom;
+    private List<String> currencyTo;
+    private double amount;                  // Exclusive to conversion method returns
+    private Map<String, Double> results;    // Exclusive to conversion method returns
+    private Map<String, Double> rates;
+    private Map<String, Integer> requestTime;
+    private Map<String, APIType> api;
 }
 ```
 
@@ -186,6 +181,8 @@ This is the structure of the returned JSON Objects:
 With the spring application running, the documentation can be accessed at:
 
 ```http://localhost:8080/swagger-ui/index.html#/```
+
+The documentation was created in the java code, setting the parameters, schemas, descriptions and error codes.
 
 ## Extra Features
 
@@ -212,7 +209,7 @@ When a new call to the API is about to be performed, the current time is checked
 - If it is outdated, a new API call is made.
 
 > [!NOTE]
-> This is mechanism is not implemented in the *GetAllRates* methods.
+> This is mechanism is not implemented in the *GetAllRates* methods since in those all Exchange Rates are fetched either way.
 
 ### Unit Testing
 
@@ -240,7 +237,3 @@ These are the methods written:
 - ```testReduceCallMechanismWait()```
 
 **The code succeeded in all unit tests performed.**
-
-### Interface
-
-

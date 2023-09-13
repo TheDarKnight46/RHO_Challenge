@@ -23,11 +23,11 @@ public class HostExchangeRateAPI implements APIInterface {
     public HostExchangeRateAPI() {}
 
 	/**
-	 * Get latest exchange rates for a specified currency and target.
+	 * Get latest exchange rates for a specified currency and target. API: Host
 	 * @param db Database of class ExchangeDB storing all the exchange rates.
 	 * @param currency Currency from which to exchange.
 	 * @param target List of target currencies to get the exchange rate.
-	 * @return Result field of JsonObject as string.
+	 * @return Result as a CustomSchema.
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
@@ -92,10 +92,10 @@ public class HostExchangeRateAPI implements APIInterface {
 	}
 
 	/**
-	 * Get all latest exchange rates for a specified currency.
+	 * Get all latest exchange rates for a specified currency. API: Host
 	 * @param db Database of class ExchangeDB storing all the exchange rates.
 	 * @param currency Currency from which to exchange.
-	 * @return Result field of JsonObject as string.
+	 * @return Result as a CustomSchema.
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
@@ -122,12 +122,12 @@ public class HostExchangeRateAPI implements APIInterface {
 	}
 
 	/**
-	 * Convert currency from one to another.
+	 * Convert currency from one to another. API: Host
 	 * @param db Database of class ExchangeDB storing all the exchange rates.
 	 * @param from Currency from which to convert.
 	 * @param to Currency to convert to.
 	 * @param amount Amount of the first currency to convert to the second.
-	 * @return Result field of JsonObject as string.
+	 * @return Result as a CustomSchema.
 	 */
 	@Override
 	public CustomSchema convertCurrency(ExchangeDB db, String from, String to, double amount) {

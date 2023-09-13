@@ -86,14 +86,29 @@ public class RequestAnswer extends CustomSchema {
         this.currencyTo.add(currency);
     }
 
+    // Rates
+
+    /**
+     * Sets rates Map replacing it with the new param
+     * @param rates New map to set rates.
+     */
     public void setRates(Map<String, Double> rates) {
         this.rates = rates;
     }
 
+    /**
+     * Add a single rate to the map with the specified parameters.
+     * @param rates Value to add to the map.
+     * @param to Currency of the rate. Key to add to the map.
+     */
     public void addRate(Double rates, String to) {
         this.rates.put(to, rates);
     }
 
+    /**
+     * Merges two maps of <String, Double> into a single one stored in the object.
+     * @param newRates Map to merge into the class map.
+     */
     public void joinRates(Map<String, Double> newRates) {
         Iterator<String> keyIt = newRates.keySet().iterator();
         Iterator<Double> valueIt = newRates.values().iterator();
@@ -108,14 +123,29 @@ public class RequestAnswer extends CustomSchema {
         }
     }
 
+    // Results
+
+    /**
+     * Sets result Map replacing it with the new param
+     * @param results New map to set results.
+     */
     public void setResults(Map<String, Double> results) {
         this.results = results;
     }
 
+    /**
+     * Add a single instance to Results map.
+     * @param result Value to add to the map.
+     * @param to Currency of the rate. Key to add to the map.
+     */
     public void addResult(Double result, String to) {
         this.results.put(to, result);
     }
 
+    /**
+     * Merges two maps of <String, Double> into a single one stored in the object.
+     * @param newResults Map to merge into the class map.
+     */
     public void joinResults(Map<String, Double> newResults) {
         Iterator<String> keyIt = newResults.keySet().iterator();
         Iterator<Double> valueIt = newResults.values().iterator();
@@ -125,7 +155,7 @@ public class RequestAnswer extends CustomSchema {
                 String key = keyIt.next();
                 Double val = valueIt.next();
                 
-                rates.put(key, val);
+                results.put(key, val);
             } catch (ClassCastException e) {}
         }
     }

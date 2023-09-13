@@ -79,9 +79,4 @@ public class Exchange {
 
         return new JSONObject(values);
     }
-
-    @Override
-    public String toString() {
-        return getExchange().toJSONString();
-    }
 }

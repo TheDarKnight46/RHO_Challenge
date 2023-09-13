@@ -4,6 +4,11 @@ import com.rho.model.schemas.BadRequestAnswer;
 
 public abstract class Check {
     
+    /**
+     * Checks if the currency matches the required Currency Code format.
+     * @param currency The currency to check.
+     * @return true of false depending on the validity.
+     */
     public static boolean isCurrencyCode(String currency) {
         try {
             Integer.parseInt(currency);
@@ -18,6 +23,11 @@ public abstract class Check {
         return new BadRequestAnswer(false, false, "Wrong currency format");
     }
 
+    /**
+     * Checks if amount is number from a string.
+     * @param amount The string to check.
+     * @return true of false depending on the validity.
+     */
     public static boolean isAmountNumber(String amount) {
         try {
             Double.parseDouble(amount);

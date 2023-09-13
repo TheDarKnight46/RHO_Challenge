@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 
 import org.json.simple.JSONObject;
 
@@ -96,13 +95,12 @@ public class ExchangeDB {
     }
 
     /**
-     * 
-     * @param from
-     * @param to
-     * @param rate
-     * @param time
-     * @param date
-     * @param source
+     * Saves newly fetched data used for conversions.
+     * @param from Currency from which it was converted.
+     * @param to Currency to which it was converted.
+     * @param rate Exchange rate of the currencies.
+     * @param time Time code of the API request.
+     * @param source What API was used: Host or Ayr.
      */
     public void saveConversionData(String from, String to, double rate, Map<String, Integer> time, APIType source) {
         Exchange e = findExchangeRate(from, to);
@@ -116,8 +114,8 @@ public class ExchangeDB {
     }
 
     /**
-     * 
-     * @param finalMap
+     * Saves newly fetched data from Exchange Rate Gets
+     * @param answer RequestAnswer provided by the service that stored all information.
      */
     public void saveData(RequestAnswer answer) {
         Map<String, Double> ratesMap = answer.getRates();
@@ -149,13 +147,12 @@ public class ExchangeDB {
     }
 
     /**
-     * 
-     * @param from
-     * @param to
-     * @param rate
-     * @param date
-     * @param time
-     * @param source
+     * Add single Exchange Rate to currencies.
+     * @param from Currency from which it was converted.
+     * @param to Currency to which it was converted.
+     * @param rate Exchange rate of the currencies.
+     * @param time Time code of the API request.
+     * @param source What API was used: Host or Ayr.
      */
     public void addExchangeRate(String from, String to, double rate, String date, Map<String, Integer> time, APIType source) {
         Exchange e = findExchangeRate(from, to);
@@ -166,47 +163,6 @@ public class ExchangeDB {
             exchanges.add(new Exchange(from, to, rate, time, source));
         }
     }
-
-    /**
-     * 
-     * @param obj
-     * @param source
-     */
-    public void addBulkExchangeRate(JSONObject obj, APIType source) {
-        String from = (String) obj.get("Currency");
-        JSONObject rates = (JSONObject) obj.get("Rates");
-
-        String date = (String) obj.get("Result Date");
-        @SuppressWarnings("unchecked") //remove later
-        Map<String, Integer> time = (Map<String, Integer>) obj.get("Request Time");
-
-        @SuppressWarnings("unchecked") //remove later
-        Set<String> rateNames = rates.keySet();
-        @SuppressWarnings("unchecked") //remove later
-        Set<Integer> rateValues = rates.entrySet();
-        Iterator<String> itNames = rateNames.iterator();
-
-        while (itNames.hasNext()) {
-            Iterator<Integer> itRates = rateValues.iterator();
-            String to = itNames.next();
-
-            while (itRates.hasNext()) {
-                int rate = itRates.next();
-                addExchangeRate(from, to, rate, date, time, source);
-            }
-        }
-    }
-
-    /**
-     * 
-     * @param from
-     * @param to
-     * @return
-     */
-    public JSONObject getExchangeRate(String from, String to) {
-        Exchange e = findExchangeRate(from, to);
-        return e.getExchange();
-    }   
     
     public List<Exchange> getExchanges() {
         return exchanges;

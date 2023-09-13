@@ -53,6 +53,10 @@ public abstract class Connections {
 		}
 	}
 
+	/**
+	 * Get current time in hour, min and seconds.
+	 * @return Map with the time values.
+	 */
 	public static Map<String, Integer> getCurrentTime() {
 		LocalTime now = LocalTime.now();
 		Map<String, Integer> time = new HashMap<>();
@@ -62,15 +66,5 @@ public abstract class Connections {
 		time.put("Seconds", now.getSecond());
 
 		return time;
-	}
-
-	public static String formatRequestTime(Map<String, Integer> time) {
-		StringBuilder str = new StringBuilder();
-
-		str.append(time.get("hour")).append(":");
-		str.append(time.get("min")).append(":");
-		str.append(time.get("sec"));
-
-		return str.toString();
 	}
 }
