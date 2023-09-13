@@ -235,7 +235,7 @@ public class ExchangeRateController {
             }
 
             String[] symbols = targets.replaceAll(" ", "").split(",");
-            RequestAnswer answer = new RequestAnswer(true, false);
+            RequestAnswer answer = new RequestAnswer(true, true);
             answer.setCurrencyFrom(from);
             answer.setAmount(Double.parseDouble(amount));
             answer.addApi(APIType.HOST, "All");
@@ -255,6 +255,9 @@ public class ExchangeRateController {
             return new ResponseEntity<CustomSchema>(answer, HttpStatus.OK);
         }
         catch (Exception e) {
+            if (e instanceof ClassCastException) {
+                return new ResponseEntity<CustomSchema>(Check.formatWrongCurrencyFormatAnswer(), HttpStatus.EXPECTATION_FAILED);
+            }
             return new ResponseEntity<CustomSchema>(Check.fatalErrorMessage(), HttpStatus.GONE);
         }
     }
@@ -307,6 +310,9 @@ public class ExchangeRateController {
             return new ResponseEntity<CustomSchema>(answer, HttpStatus.OK);
         }
         catch (Exception e) {
+            if (e instanceof ClassCastException) {
+                return new ResponseEntity<CustomSchema>(Check.formatWrongCurrencyFormatAnswer(), HttpStatus.EXPECTATION_FAILED);
+            }
             return new ResponseEntity<CustomSchema>(Check.fatalErrorMessage(), HttpStatus.GONE);
         }
     }
